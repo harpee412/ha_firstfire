@@ -466,5 +466,7 @@ export default function ChatInterface() {
         </form>
       </div>
     </div>
+    </div>
+  </div>
   )
 }
