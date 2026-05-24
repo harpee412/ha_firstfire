@@ -1,6 +1,6 @@
 /**
  * FirstFire Chat Interface Component
- * Valheim-inspired design
+ * Cyberpunk/Sci-Fi Design
  */
 
 import { useState, useRef, useEffect } from "react"
@@ -83,386 +83,428 @@ export default function ChatInterface() {
       style={{
         width: "100vw",
         height: "100vh",
-        background: "linear-gradient(135deg, #2d1810 0%, #1a0f0a 50%, #0f0606 100%)",
+        background: "#0a0c10",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
         position: "relative",
+        fontFamily: "'Space Mono', monospace",
+        color: "#e8eaf6",
       }}
     >
-      {/* Background texture */}
+      {/* Scanline overlay */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `
-            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px),
-            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px)
-          `,
+          position: "fixed",
+          inset: 0,
+          backgroundImage: `repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0,229,255,0.015) 2px,
+            rgba(0,229,255,0.015) 4px
+          )`,
           pointerEvents: "none",
+          zIndex: 100,
         }}
       />
 
-      {/* Main content */}
-      <div
+      {/* Header */}
+      <header
         style={{
+          padding: "2rem 2rem 1rem",
+          borderBottom: "1px solid #1e2540",
           display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          position: "relative",
-          zIndex: 1,
+          alignItems: "center",
+          gap: "1.5rem",
+          position: "sticky",
+          top: 0,
+          background: "rgba(10,12,16,0.95)",
+          backdropFilter: "blur(12px)",
+          zIndex: 50,
         }}
       >
-        {/* Header */}
         <div
           style={{
-            padding: "1.5rem 2rem",
-            borderBottom: "3px solid #8b5a2b",
+            width: "44px",
+            height: "44px",
+            background: "linear-gradient(135deg, #00e5ff, #0077ff)",
+            borderRadius: "8px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            background: "linear-gradient(135deg, rgba(61, 34, 20, 0.95) 0%, rgba(45, 24, 16, 0.95) 100%)",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(139, 90, 43, 0.3)",
+            justifyContent: "center",
+            fontSize: "1.4rem",
+            boxShadow: "0 0 20px rgba(0,229,255,0.25)",
+            flexShrink: 0,
           }}
         >
-          <div
+          🔥
+        </div>
+        <div>
+          <h1
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1.2rem",
-            }}
-          >
-            <div style={{ fontSize: "2.5rem" }}>⚔️</div>
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: "1.8rem",
-                  color: "#d4af37",
-                  fontWeight: 800,
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
-                }}
-              >
-                FirstFire
-              </h2>
-              <p
-                style={{
-                  margin: "0.25rem 0 0 0",
-                  fontSize: "0.9rem",
-                  color: "#c19a6b",
-                }}
-              >
-                🏰 Your Viking Guide to Home Automation
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            title="Settings"
-            style={{
-              width: "45px",
-              height: "45px",
-              padding: 0,
-              background: "rgba(139, 90, 43, 0.4)",
-              border: "2px solid #8b5a2b",
-              borderRadius: "4px",
-              color: "#d4af37",
-              cursor: "pointer",
-              fontSize: "1.4rem",
-              transition: "all 0.2s",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "1.2rem",
               fontWeight: 700,
-            }}
-            onMouseEnter={(e) => {
-              ;(e.target as HTMLButtonElement).style.background =
-                "rgba(139, 90, 43, 0.6)"
-            }}
-            onMouseLeave={(e) => {
-              ;(e.target as HTMLButtonElement).style.background =
-                "rgba(139, 90, 43, 0.4)"
+              letterSpacing: "0.05em",
+              color: "#00e5ff",
+              textShadow: "0 0 20px rgba(0,229,255,0.25)",
+              margin: 0,
             }}
           >
-            🛡️
-          </button>
+            FirstFire
+          </h1>
+          <p
+            style={{
+              fontSize: "0.65rem",
+              color: "#5c6394",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              marginTop: "2px",
+              margin: "2px 0 0 0",
+            }}
+          >
+            Home Automation Oracle
+          </p>
         </div>
 
-        {/* Settings Panel */}
-        {showSettings && (
-          <div
-            style={{
-              padding: "1.5rem",
-              background: "linear-gradient(135deg, rgba(61, 34, 20, 0.8) 0%, rgba(45, 24, 16, 0.8) 100%)",
-              borderBottom: "2px solid #8b5a2b",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "1rem",
-            }}
-          >
-            <button
-              onClick={handleClearChat}
-              style={{
-                padding: "0.75rem 1rem",
-                background: "rgba(139, 90, 43, 0.3)",
-                color: "#c19a6b",
-                border: "1px solid #8b5a2b",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "0.9rem",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                ;(e.target as HTMLButtonElement).style.background =
-                  "rgba(139, 90, 43, 0.5)"
-                ;(e.target as HTMLButtonElement).style.color = "#d4af37"
-              }}
-              onMouseLeave={(e) => {
-                ;(e.target as HTMLButtonElement).style.background =
-                  "rgba(139, 90, 43, 0.3)"
-                ;(e.target as HTMLButtonElement).style.color = "#c19a6b"
-              }}
-            >
-              🗑️ Clear Scrolls
-            </button>
-
-            <button
-              onClick={handleLogout}
-              style={{
-                padding: "0.75rem 1rem",
-                background: "rgba(127, 29, 29, 0.2)",
-                color: "#f87171",
-                border: "1px solid rgba(220, 38, 38, 0.5)",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "0.9rem",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                ;(e.target as HTMLButtonElement).style.background =
-                  "rgba(127, 29, 29, 0.4)"
-              }}
-              onMouseLeave={(e) => {
-                ;(e.target as HTMLButtonElement).style.background =
-                  "rgba(127, 29, 29, 0.2)"
-              }}
-            >
-              🚪 Depart
-            </button>
-          </div>
-        )}
-
-        {/* Messages Area */}
-        <div
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          title="Settings"
           style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "2rem 1.5rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
+            marginLeft: "auto",
+            width: "45px",
+            height: "45px",
+            padding: 0,
+            background: "transparent",
+            border: "1px solid #1e2540",
+            borderRadius: "4px",
+            color: "#00e5ff",
+            cursor: "pointer",
+            fontSize: "1.2rem",
+            transition: "all 0.2s",
+            fontWeight: 700,
+          }}
+          onMouseEnter={(e) => {
+            ;(e.target as HTMLButtonElement).style.borderColor = "#00e5ff"
+            ;(e.target as HTMLButtonElement).style.boxShadow =
+              "0 0 15px rgba(0,229,255,0.3)"
+          }}
+          onMouseLeave={(e) => {
+            ;(e.target as HTMLButtonElement).style.borderColor = "#1e2540"
+            ;(e.target as HTMLButtonElement).style.boxShadow = "none"
           }}
         >
-          {messages.length === 0 && !isLoading && (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                color: "#94a3b8",
-              }}
-            >
-              <div>
-                <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>
-                  📜
-                </div>
-                <p style={{ color: "#d4af37", fontSize: "1.3rem", fontWeight: 600, marginBottom: "0.5rem" }}>
-                  Greetings, Wanderer
-                </p>
-                <p style={{ color: "#c19a6b" }}>Ask me anything about Home Assistant!</p>
-                <p style={{ fontSize: "0.9rem", marginTop: "0.5rem", color: "#64748b" }}>
-                  Setup help, configuration tips, integration guides...
-                </p>
-              </div>
-            </div>
-          )}
+          ⚙
+        </button>
+      </header>
 
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              style={{
-                display: "flex",
-                justifyContent:
-                  msg.role === "user" ? "flex-end" : "flex-start",
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: "70%",
-                  padding: "1rem 1.5rem",
-                  borderRadius: "8px",
-                  background:
-                    msg.role === "user"
-                      ? "rgba(139, 90, 43, 0.3)"
-                      : "rgba(139, 90, 43, 0.15)",
-                  border: `1px solid ${
-                    msg.role === "user"
-                      ? "rgba(212, 175, 55, 0.3)"
-                      : "rgba(139, 90, 43, 0.4)"
-                  }`,
-                  color:
-                    msg.role === "user"
-                      ? "#d4af37"
-                      : "#e2e8f0",
-                  lineHeight: 1.6,
-                }}
-              >
-                {msg.content}
-                {msg.tokens_used && (
-                  <div
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "#c19a6b",
-                      marginTop: "0.5rem",
-                    }}
-                  >
-                    ⚡ {msg.tokens_used} runes
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isLoading && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-start",
-              }}
-            >
-              <div
-                style={{
-                  padding: "1rem 1.5rem",
-                  borderRadius: "8px",
-                  background: "rgba(139, 90, 43, 0.15)",
-                  border: "1px solid rgba(139, 90, 43, 0.4)",
-                  color: "#c19a6b",
-                  fontStyle: "italic",
-                }}
-              >
-                ✨ Consulting the oracle...
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div
-              style={{
-                padding: "1rem",
-                background: "rgba(127, 29, 29, 0.2)",
-                border: "1px solid rgba(220, 38, 38, 0.5)",
-                borderRadius: "8px",
-                color: "#f87171",
-                fontSize: "0.9rem",
-              }}
-            >
-              ⚔️ {error}
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area */}
+      {/* Settings Panel */}
+      {showSettings && (
         <div
           style={{
             padding: "1.5rem",
-            borderTop: "2px solid #8b5a2b",
-            background: "rgba(20, 15, 10, 0.7)",
+            background: "#111420",
+            borderBottom: "1px solid #1e2540",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1rem",
           }}
         >
-          <form onSubmit={handleSendMessage}>
-            <div
-              style={{
-                display: "flex",
-                gap: "1rem",
-                alignItems: "flex-end",
-              }}
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask the oracle of Home Assistant..."
-                disabled={isLoading}
+          <button
+            onClick={handleClearChat}
+            style={{
+              padding: "0.65rem 1.25rem",
+              background: "transparent",
+              color: "#5c6394",
+              border: "1px solid #1e2540",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "0.65rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              transition: "all 0.2s",
+              fontFamily: "'Space Mono', monospace",
+            }}
+            onMouseEnter={(e) => {
+              ;(e.target as HTMLButtonElement).style.borderColor = "#ff3d71"
+              ;(e.target as HTMLButtonElement).style.color = "#ff3d71"
+              ;(e.target as HTMLButtonElement).style.boxShadow =
+                "0 0 15px rgba(255,61,113,0.2)"
+            }}
+            onMouseLeave={(e) => {
+              ;(e.target as HTMLButtonElement).style.borderColor = "#1e2540"
+              ;(e.target as HTMLButtonElement).style.color = "#5c6394"
+              ;(e.target as HTMLButtonElement).style.boxShadow = "none"
+            }}
+          >
+            Clear Chat
+          </button>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: "0.65rem 1.25rem",
+              background: "transparent",
+              color: "#5c6394",
+              border: "1px solid #1e2540",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "0.65rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              transition: "all 0.2s",
+              fontFamily: "'Space Mono', monospace",
+            }}
+            onMouseEnter={(e) => {
+              ;(e.target as HTMLButtonElement).style.borderColor = "#ff3d71"
+              ;(e.target as HTMLButtonElement).style.color = "#ff3d71"
+              ;(e.target as HTMLButtonElement).style.boxShadow =
+                "0 0 15px rgba(255,61,113,0.2)"
+            }}
+            onMouseLeave={(e) => {
+              ;(e.target as HTMLButtonElement).style.borderColor = "#1e2540"
+              ;(e.target as HTMLButtonElement).style.color = "#5c6394"
+              ;(e.target as HTMLButtonElement).style.boxShadow = "none"
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      )}
+
+      {/* Messages Area */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "2rem 0",
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+          width: "100%",
+        }}
+      >
+        {messages.length === 0 && !isLoading && (
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              color: "#5c6394",
+            }}
+          >
+            <div>
+              <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>
+                ▶
+              </div>
+              <p
                 style={{
-                  flex: 1,
-                  padding: "0.75rem 1rem",
-                  background: "rgba(20, 15, 10, 0.8)",
-                  border: "1px solid #8b5a2b",
-                  borderRadius: "4px",
-                  color: "#d4af37",
+                  color: "#00e5ff",
                   fontSize: "1rem",
-                  transition: "all 0.2s",
-                  opacity: isLoading ? 0.5 : 1,
-                }}
-                onFocus={(e) => {
-                  ;(e.target as HTMLInputElement).style.borderColor = "#d4af37"
-                  ;(e.target as HTMLInputElement).style.boxShadow =
-                    "0 0 10px rgba(212, 175, 55, 0.2)"
-                }}
-                onBlur={(e) => {
-                  ;(e.target as HTMLInputElement).style.borderColor = "#8b5a2b"
-                  ;(e.target as HTMLInputElement).style.boxShadow = "none"
-                }}
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || isLoading}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background:
-                    !input.trim() || isLoading
-                      ? "rgba(139, 90, 43, 0.3)"
-                      : "linear-gradient(135deg, #c84a1a 0%, #8b3a0a 100%)",
-                  color:
-                    !input.trim() || isLoading
-                      ? "#8b5a2b"
-                      : "#d4af37",
-                  border: `2px solid ${
-                    !input.trim() || isLoading
-                      ? "rgba(139, 90, 43, 0.3)"
-                      : "#d4af37"
-                  }`,
-                  borderRadius: "4px",
-                  cursor:
-                    !input.trim() || isLoading ? "not-allowed" : "pointer",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  transition: "all 0.2s",
-                  textShadow: !input.trim() || isLoading ? "none" : "1px 1px 2px rgba(0,0,0,0.5)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!(!input.trim() || isLoading)) {
-                    ;(e.target as HTMLButtonElement).style.transform =
-                      "translateY(-2px)"
-                    ;(e.target as HTMLButtonElement).style.boxShadow =
-                      "0 8px 16px rgba(200, 74, 26, 0.4)"
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.target as HTMLButtonElement).style.transform = "translateY(0)"
-                  ;(e.target as HTMLButtonElement).style.boxShadow = "none"
+                  fontWeight: 700,
+                  marginBottom: "0.5rem",
+                  textShadow: "0 0 10px rgba(0,229,255,0.3)",
                 }}
               >
-                ⚔️ Consult
-              </button>
+                Ready to automate
+              </p>
+              <p style={{ color: "#5c6394", fontSize: "0.8rem" }}>
+                Ask anything about Home Assistant setup, configuration, or integrations
+              </p>
             </div>
-          </form>
-        </div>
+          </div>
+        )}
+
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            style={{
+              display: "flex",
+              justifyContent:
+                msg.role === "user" ? "flex-end" : "flex-start",
+              paddingLeft: "1.5rem",
+              paddingRight: "1.5rem",
+            }}
+          >
+            <div
+              style={{
+                maxWidth: "85%",
+                padding: "1rem 1.5rem",
+                borderRadius: "6px",
+                background:
+                  msg.role === "user"
+                    ? "rgba(0, 229, 255, 0.08)"
+                    : "#181d2e",
+                border: `1px solid ${
+                  msg.role === "user"
+                    ? "rgba(0, 229, 255, 0.3)"
+                    : "#1e2540"
+                }`,
+                color: msg.role === "user" ? "#00e5ff" : "#e8eaf6",
+                lineHeight: 1.6,
+                fontSize: "0.9rem",
+                boxShadow:
+                  msg.role === "user"
+                    ? "0 0 15px rgba(0,229,255,0.1)"
+                    : "none",
+              }}
+            >
+              {msg.content}
+              {msg.tokens_used && (
+                <div
+                  style={{
+                    fontSize: "0.7rem",
+                    color: "#5c6394",
+                    marginTop: "0.5rem",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  {msg.tokens_used} tokens
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {isLoading && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              paddingLeft: "1.5rem",
+              paddingRight: "1.5rem",
+            }}
+          >
+            <div
+              style={{
+                padding: "1rem 1.5rem",
+                borderRadius: "6px",
+                background: "#181d2e",
+                border: "1px solid #1e2540",
+                color: "#5c6394",
+              }}
+            >
+              ▌ Processing...
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              margin: "0 1.5rem",
+              padding: "1rem",
+              background: "rgba(255, 61, 113, 0.08)",
+              border: "1px solid rgba(255, 61, 113, 0.3)",
+              borderRadius: "6px",
+              color: "#ff3d71",
+              fontSize: "0.9rem",
+            }}
+          >
+            ⚠ {error}
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Area */}
+      <div
+        style={{
+          padding: "1.5rem",
+          borderTop: "1px solid #1e2540",
+          background: "#0a0c10",
+        }}
+      >
+        <form onSubmit={handleSendMessage}>
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              alignItems: "flex-end",
+            }}
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask the oracle..."
+              disabled={isLoading}
+              style={{
+                flex: 1,
+                padding: "0.75rem 1rem",
+                background: "#111420",
+                border: "1px solid #1e2540",
+                borderRadius: "6px",
+                color: "#e8eaf6",
+                fontSize: "0.9rem",
+                transition: "all 0.2s",
+                opacity: isLoading ? 0.5 : 1,
+                fontFamily: "'Space Mono', monospace",
+              }}
+              onFocus={(e) => {
+                ;(e.target as HTMLInputElement).style.borderColor = "#00e5ff"
+                ;(e.target as HTMLInputElement).style.boxShadow =
+                  "0 0 15px rgba(0,229,255,0.2)"
+              }}
+              onBlur={(e) => {
+                ;(e.target as HTMLInputElement).style.borderColor = "#1e2540"
+                ;(e.target as HTMLInputElement).style.boxShadow = "none"
+              }}
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              style={{
+                padding: "0.75rem 1.5rem",
+                background:
+                  !input.trim() || isLoading
+                    ? "transparent"
+                    : "#00e5ff",
+                color:
+                  !input.trim() || isLoading
+                    ? "#5c6394"
+                    : "#000",
+                border: `1px solid ${
+                  !input.trim() || isLoading
+                    ? "#1e2540"
+                    : "#00e5ff"
+                }`,
+                borderRadius: "6px",
+                cursor:
+                  !input.trim() || isLoading ? "not-allowed" : "pointer",
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                transition: "all 0.2s",
+                boxShadow:
+                  !input.trim() || isLoading
+                    ? "none"
+                    : "0 0 15px rgba(0,229,255,0.3)",
+                fontFamily: "'Space Mono', monospace",
+              }}
+              onMouseEnter={(e) => {
+                if (!(!input.trim() || isLoading)) {
+                  ;(e.target as HTMLButtonElement).style.boxShadow =
+                    "0 0 25px rgba(0,229,255,0.5)"
+                  ;(e.target as HTMLButtonElement).style.transform =
+                    "translateY(-1px)"
+                }
+              }}
+              onMouseLeave={(e) => {
+                ;(e.target as HTMLButtonElement).style.boxShadow =
+                  "0 0 15px rgba(0,229,255,0.3)"
+                ;(e.target as HTMLButtonElement).style.transform = "translateY(0)"
+              }}
+            >
+              Submit
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
