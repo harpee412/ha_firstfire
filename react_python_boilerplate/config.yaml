@@ -1,0 +1,28 @@
+name: React Python Boilerplate
+version: "1.0.2"
+slug: react_python_boilerplate
+description: React and Python Home Assistant add-on
+startup: services
+boot: auto
+
+arch:
+  - amd64
+  - aarch64
+  - armv7
+
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:react
+
+homeassistant_api: true
+
+ports:
+  8099/tcp: 8099
+
+ports_description:
+  8099/tcp: Web UI
+
+init: false
+
+options: {}
+schema: {}
