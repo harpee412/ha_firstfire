@@ -1,5 +1,5 @@
 name: FirstFire
-version: "0.1.3"
+version: "0.1.4"
 slug: firstfire
 description: FirstFire - AI-Powered Home Assistant Onboarding with OpenAI
 startup: services
@@ -29,20 +29,6 @@ options:
   model: gpt-4-turbo
 
 schema:
-  openai_token:
-    name: OpenAI API Token
-    description: Your OpenAI API key (get one at https://platform.openai.com/api-keys)
-    type: string
-    default: ""
-
-  max_tokens:
-    name: Max Tokens per Response
-    description: Maximum tokens for AI responses
-    type: integer
-    default: 500
-
-  model:
-    name: OpenAI Model
-    description: Which OpenAI model to use
-    type: string
-    default: gpt-4-turbo
+  openai_token: str
+  max_tokens: int
+  model: str
