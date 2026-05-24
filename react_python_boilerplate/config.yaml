@@ -30,35 +30,19 @@ options:
   model: "gpt-4-turbo"
 
 schema:
-  openai_token:
+  - id: openai_token
     name: OpenAI API Token
-    description: "Your OpenAI API key. Get one at https://platform.openai.com/api-keys"
-    required: false
+    description: Your OpenAI API key. Get one at https://platform.openai.com/api-keys
     type: string
 
-  max_tokens:
+  - id: max_tokens
     name: Max Tokens per Response
-    description: "Maximum tokens for AI responses (100-4000, default: 500)"
-    required: false
+    description: Maximum tokens for AI responses (100-4000, default 500)
     type: integer
     default: 500
-    minimum: 100
-    maximum: 4000
 
-  model:
+  - id: model
     name: OpenAI Model
-    description: "Which OpenAI model to use for responses"
-    required: false
+    description: Which OpenAI model to use for responses
     type: string
-    default: "gpt-4-turbo"
-    enum:
-      - "gpt-4-turbo"
-      - "gpt-4"
-      - "gpt-3.5-turbo"
-
-  system_prompt:
-    name: System Prompt
-    description: "Custom system prompt for the AI assistant"
-    required: false
-    type: string
-    default: "You are a friendly and helpful assistant for Home Assistant setup and configuration. Keep responses concise, practical, and easy to understand. Use emojis sparingly to add personality."
+    default: gpt-4-turbo
