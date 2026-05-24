@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
-from config import get_config_manager
-from api.routes import router as api_router
+from .config import get_config_manager
+from .api.routes import router as api_router
 
 # Initialize configuration
 config_manager = get_config_manager()

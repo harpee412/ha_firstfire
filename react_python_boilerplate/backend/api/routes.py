@@ -7,7 +7,7 @@ Handles configuration, validation, and OpenAI chat endpoints
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from config import get_config_manager, get_config, ConfigManager
+from ..config import get_config_manager, get_config, ConfigManager, FirstFireConfig
 import openai
 
 router = APIRouter()
@@ -174,6 +174,12 @@ async def validate_token(request: ConfigInitRequest) -> ValidationResponse:
             success=False,
             valid=False,
             error=f"Invalid token format: {str(e)}"
+        )
+    except Exception as e:
+        return ValidationResponse(
+            success=False,
+            valid=False,
+            error=f"Validation error: {str(e)}"
         )
 
 
