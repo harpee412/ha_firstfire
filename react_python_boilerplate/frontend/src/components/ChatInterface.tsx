@@ -7,6 +7,18 @@ import { useState, useRef, useEffect } from "react"
 import { sendChat, Storage } from "../api"
 import { Message } from "../types"
 
+const CSS_VARS = {
+  bg: "#0a0c10",
+  surface: "#111420",
+  surface2: "#181d2e",
+  border: "#1e2540",
+  accent: "#00e5ff",
+  accent2: "#ff3d71",
+  accent3: "#39ff14",
+  text: "#e8eaf6",
+  muted: "#5c6394",
+}
+
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
@@ -15,7 +27,6 @@ export default function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [showSettings, setShowSettings] = useState(false)
 
-  // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
@@ -29,7 +40,6 @@ export default function ChatInterface() {
     const userMessage = input.trim()
     setInput("")
 
-    // Add user message to display
     const userMsg: Message = {
       id: `user-${Date.now()}`,
       role: "user",
@@ -83,13 +93,13 @@ export default function ChatInterface() {
       style={{
         width: "100vw",
         height: "100vh",
-        background: "#0a0c10",
+        background: CSS_VARS.bg,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
         position: "relative",
         fontFamily: "'Space Mono', monospace",
-        color: "#e8eaf6",
+        color: CSS_VARS.text,
       }}
     >
       {/* Scanline overlay */}
@@ -113,7 +123,7 @@ export default function ChatInterface() {
       <header
         style={{
           padding: "2rem 2rem 1rem",
-          borderBottom: "1px solid #1e2540",
+          borderBottom: `1px solid ${CSS_VARS.border}`,
           display: "flex",
           alignItems: "center",
           gap: "1.5rem",
@@ -145,9 +155,9 @@ export default function ChatInterface() {
             style={{
               fontFamily: "'Space Mono', monospace",
               fontSize: "1.2rem",
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.05em",
-              color: "#00e5ff",
+              color: CSS_VARS.accent,
               textShadow: "0 0 20px rgba(0,229,255,0.25)",
               margin: 0,
             }}
@@ -157,7 +167,7 @@ export default function ChatInterface() {
           <p
             style={{
               fontSize: "0.65rem",
-              color: "#5c6394",
+              color: CSS_VARS.muted,
               letterSpacing: "0.15em",
               textTransform: "uppercase",
               marginTop: "2px",
@@ -177,21 +187,21 @@ export default function ChatInterface() {
             height: "45px",
             padding: 0,
             background: "transparent",
-            border: "1px solid #1e2540",
-            borderRadius: "4px",
-            color: "#00e5ff",
+            border: `1px solid ${CSS_VARS.border}`,
+            borderRadius: "6px",
+            color: CSS_VARS.accent,
             cursor: "pointer",
             fontSize: "1.2rem",
             transition: "all 0.2s",
             fontWeight: 700,
           }}
           onMouseEnter={(e) => {
-            ;(e.target as HTMLButtonElement).style.borderColor = "#00e5ff"
+            ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent
             ;(e.target as HTMLButtonElement).style.boxShadow =
               "0 0 15px rgba(0,229,255,0.3)"
           }}
           onMouseLeave={(e) => {
-            ;(e.target as HTMLButtonElement).style.borderColor = "#1e2540"
+            ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.border
             ;(e.target as HTMLButtonElement).style.boxShadow = "none"
           }}
         >
@@ -204,8 +214,8 @@ export default function ChatInterface() {
         <div
           style={{
             padding: "1.5rem",
-            background: "#111420",
-            borderBottom: "1px solid #1e2540",
+            background: CSS_VARS.surface,
+            borderBottom: `1px solid ${CSS_VARS.border}`,
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: "1rem",
@@ -216,8 +226,8 @@ export default function ChatInterface() {
             style={{
               padding: "0.65rem 1.25rem",
               background: "transparent",
-              color: "#5c6394",
-              border: "1px solid #1e2540",
+              color: CSS_VARS.muted,
+              border: `1px solid ${CSS_VARS.border}`,
               borderRadius: "6px",
               cursor: "pointer",
               fontSize: "0.65rem",
@@ -227,14 +237,14 @@ export default function ChatInterface() {
               fontFamily: "'Space Mono', monospace",
             }}
             onMouseEnter={(e) => {
-              ;(e.target as HTMLButtonElement).style.borderColor = "#ff3d71"
-              ;(e.target as HTMLButtonElement).style.color = "#ff3d71"
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent2
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.accent2
               ;(e.target as HTMLButtonElement).style.boxShadow =
                 "0 0 15px rgba(255,61,113,0.2)"
             }}
             onMouseLeave={(e) => {
-              ;(e.target as HTMLButtonElement).style.borderColor = "#1e2540"
-              ;(e.target as HTMLButtonElement).style.color = "#5c6394"
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.border
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.muted
               ;(e.target as HTMLButtonElement).style.boxShadow = "none"
             }}
           >
@@ -246,8 +256,8 @@ export default function ChatInterface() {
             style={{
               padding: "0.65rem 1.25rem",
               background: "transparent",
-              color: "#5c6394",
-              border: "1px solid #1e2540",
+              color: CSS_VARS.muted,
+              border: `1px solid ${CSS_VARS.border}`,
               borderRadius: "6px",
               cursor: "pointer",
               fontSize: "0.65rem",
@@ -257,14 +267,14 @@ export default function ChatInterface() {
               fontFamily: "'Space Mono', monospace",
             }}
             onMouseEnter={(e) => {
-              ;(e.target as HTMLButtonElement).style.borderColor = "#ff3d71"
-              ;(e.target as HTMLButtonElement).style.color = "#ff3d71"
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent2
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.accent2
               ;(e.target as HTMLButtonElement).style.boxShadow =
                 "0 0 15px rgba(255,61,113,0.2)"
             }}
             onMouseLeave={(e) => {
-              ;(e.target as HTMLButtonElement).style.borderColor = "#1e2540"
-              ;(e.target as HTMLButtonElement).style.color = "#5c6394"
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.border
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.muted
               ;(e.target as HTMLButtonElement).style.boxShadow = "none"
             }}
           >
@@ -278,7 +288,7 @@ export default function ChatInterface() {
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "2rem 0",
+          padding: "2rem 2rem",
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
@@ -293,7 +303,7 @@ export default function ChatInterface() {
               alignItems: "center",
               justifyContent: "center",
               textAlign: "center",
-              color: "#5c6394",
+              color: CSS_VARS.muted,
             }}
           >
             <div>
@@ -302,17 +312,18 @@ export default function ChatInterface() {
               </div>
               <p
                 style={{
-                  color: "#00e5ff",
-                  fontSize: "1rem",
+                  color: CSS_VARS.accent,
+                  fontSize: "1.1rem",
                   fontWeight: 700,
                   marginBottom: "0.5rem",
                   textShadow: "0 0 10px rgba(0,229,255,0.3)",
+                  margin: "0 0 0.5rem 0",
                 }}
               >
                 Ready to automate
               </p>
-              <p style={{ color: "#5c6394", fontSize: "0.8rem" }}>
-                Ask anything about Home Assistant setup, configuration, or integrations
+              <p style={{ color: CSS_VARS.muted, fontSize: "0.9rem", margin: 0 }}>
+                Ask anything about Home Assistant
               </p>
             </div>
           </div>
@@ -325,27 +336,25 @@ export default function ChatInterface() {
               display: "flex",
               justifyContent:
                 msg.role === "user" ? "flex-end" : "flex-start",
-              paddingLeft: "1.5rem",
-              paddingRight: "1.5rem",
             }}
           >
             <div
               style={{
-                maxWidth: "85%",
-                padding: "1rem 1.5rem",
-                borderRadius: "6px",
+                padding: "1rem 1.25rem",
+                borderRadius: "8px",
                 background:
                   msg.role === "user"
-                    ? "rgba(0, 229, 255, 0.08)"
-                    : "#181d2e",
+                    ? CSS_VARS.surface2
+                    : CSS_VARS.surface,
                 border: `1px solid ${
                   msg.role === "user"
-                    ? "rgba(0, 229, 255, 0.3)"
-                    : "#1e2540"
+                    ? "rgba(0,229,255,0.2)"
+                    : CSS_VARS.border
                 }`,
-                color: msg.role === "user" ? "#00e5ff" : "#e8eaf6",
+                color: msg.role === "user" ? CSS_VARS.accent : CSS_VARS.text,
                 lineHeight: 1.6,
-                fontSize: "0.9rem",
+                fontSize: "0.85rem",
+                maxWidth: "100%",
                 boxShadow:
                   msg.role === "user"
                     ? "0 0 15px rgba(0,229,255,0.1)"
@@ -356,8 +365,8 @@ export default function ChatInterface() {
               {msg.tokens_used && (
                 <div
                   style={{
-                    fontSize: "0.7rem",
-                    color: "#5c6394",
+                    fontSize: "0.65rem",
+                    color: CSS_VARS.muted,
                     marginTop: "0.5rem",
                     letterSpacing: "0.05em",
                   }}
@@ -374,17 +383,16 @@ export default function ChatInterface() {
             style={{
               display: "flex",
               justifyContent: "flex-start",
-              paddingLeft: "1.5rem",
-              paddingRight: "1.5rem",
             }}
           >
             <div
               style={{
-                padding: "1rem 1.5rem",
-                borderRadius: "6px",
-                background: "#181d2e",
-                border: "1px solid #1e2540",
-                color: "#5c6394",
+                padding: "1rem 1.25rem",
+                borderRadius: "8px",
+                background: CSS_VARS.surface2,
+                border: `1px solid ${CSS_VARS.border}`,
+                color: CSS_VARS.muted,
+                fontSize: "0.85rem",
               }}
             >
               ▌ Processing...
@@ -395,13 +403,12 @@ export default function ChatInterface() {
         {error && (
           <div
             style={{
-              margin: "0 1.5rem",
               padding: "1rem",
-              background: "rgba(255, 61, 113, 0.08)",
-              border: "1px solid rgba(255, 61, 113, 0.3)",
-              borderRadius: "6px",
-              color: "#ff3d71",
-              fontSize: "0.9rem",
+              background: "rgba(255,61,113,0.08)",
+              border: `1px solid rgba(255,61,113,0.3)`,
+              borderRadius: "8px",
+              color: CSS_VARS.accent2,
+              fontSize: "0.85rem",
             }}
           >
             ⚠ {error}
@@ -414,9 +421,9 @@ export default function ChatInterface() {
       {/* Input Area */}
       <div
         style={{
-          padding: "1.5rem",
-          borderTop: "1px solid #1e2540",
-          background: "#0a0c10",
+          padding: "1.5rem 2rem",
+          borderTop: `1px solid ${CSS_VARS.border}`,
+          background: CSS_VARS.bg,
         }}
       >
         <form onSubmit={handleSendMessage}>
@@ -436,22 +443,22 @@ export default function ChatInterface() {
               style={{
                 flex: 1,
                 padding: "0.75rem 1rem",
-                background: "#111420",
-                border: "1px solid #1e2540",
+                background: CSS_VARS.surface,
+                border: `1px solid ${CSS_VARS.border}`,
                 borderRadius: "6px",
-                color: "#e8eaf6",
-                fontSize: "0.9rem",
+                color: CSS_VARS.text,
+                fontSize: "0.85rem",
                 transition: "all 0.2s",
                 opacity: isLoading ? 0.5 : 1,
                 fontFamily: "'Space Mono', monospace",
               }}
               onFocus={(e) => {
-                ;(e.target as HTMLInputElement).style.borderColor = "#00e5ff"
+                ;(e.target as HTMLInputElement).style.borderColor = CSS_VARS.accent
                 ;(e.target as HTMLInputElement).style.boxShadow =
                   "0 0 15px rgba(0,229,255,0.2)"
               }}
               onBlur={(e) => {
-                ;(e.target as HTMLInputElement).style.borderColor = "#1e2540"
+                ;(e.target as HTMLInputElement).style.borderColor = CSS_VARS.border
                 ;(e.target as HTMLInputElement).style.boxShadow = "none"
               }}
             />
@@ -459,19 +466,19 @@ export default function ChatInterface() {
               type="submit"
               disabled={!input.trim() || isLoading}
               style={{
-                padding: "0.75rem 1.5rem",
+                padding: "0.65rem 1.25rem",
                 background:
                   !input.trim() || isLoading
                     ? "transparent"
-                    : "#00e5ff",
+                    : CSS_VARS.accent,
                 color:
                   !input.trim() || isLoading
-                    ? "#5c6394"
+                    ? CSS_VARS.muted
                     : "#000",
                 border: `1px solid ${
                   !input.trim() || isLoading
-                    ? "#1e2540"
-                    : "#00e5ff"
+                    ? CSS_VARS.border
+                    : CSS_VARS.accent
                 }`,
                 borderRadius: "6px",
                 cursor:
