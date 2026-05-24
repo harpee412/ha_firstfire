@@ -1,7 +1,7 @@
 name: FirstFire
-version: "0.0.1"
+version: "0.1.0"
 slug: firstfire
-description: FirstFire React and Python Home Assistant add-on
+description: FirstFire - AI-Powered Home Assistant Onboarding with OpenAI Integration
 startup: services
 boot: auto
 
@@ -12,7 +12,7 @@ arch:
 
 ingress: true
 ingress_port: 8099
-panel_icon: mdi:react
+panel_icon: mdi:fire
 
 homeassistant_api: true
 
@@ -24,5 +24,41 @@ ports_description:
 
 init: false
 
-options: {}
-schema: {}
+options:
+  openai_token: ""
+  max_tokens: 500
+  model: "gpt-4-turbo"
+
+schema:
+  openai_token:
+    name: OpenAI API Token
+    description: "Your OpenAI API key. Get one at https://platform.openai.com/api-keys"
+    required: false
+    type: string
+
+  max_tokens:
+    name: Max Tokens per Response
+    description: "Maximum tokens for AI responses (100-4000, default: 500)"
+    required: false
+    type: integer
+    default: 500
+    minimum: 100
+    maximum: 4000
+
+  model:
+    name: OpenAI Model
+    description: "Which OpenAI model to use for responses"
+    required: false
+    type: string
+    default: "gpt-4-turbo"
+    enum:
+      - "gpt-4-turbo"
+      - "gpt-4"
+      - "gpt-3.5-turbo"
+
+  system_prompt:
+    name: System Prompt
+    description: "Custom system prompt for the AI assistant"
+    required: false
+    type: string
+    default: "You are a friendly and helpful assistant for Home Assistant setup and configuration. Keep responses concise, practical, and easy to understand. Use emojis sparingly to add personality."

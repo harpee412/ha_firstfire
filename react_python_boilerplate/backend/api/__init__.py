@@ -1,0 +1,1 @@
+"""FirstFire API module"""
