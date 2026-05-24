@@ -81,46 +81,69 @@ export default function ChatInterface() {
   return (
     <div
       style={{
-        width: "100%",
-        maxWidth: "900px",
+        width: "100vw",
         height: "100vh",
-        maxHeight: "100vh",
-        background: "rgba(15, 23, 42, 0.95)",
-        border: "1px solid rgba(148, 163, 184, 0.15)",
-        borderRadius: "24px",
+        background: "linear-gradient(135deg, #2d1810 0%, #1a0f0a 50%, #0f0606 100%)",
         display: "flex",
         flexDirection: "column",
-        backdropFilter: "blur(20px)",
-        boxShadow: "0 25px 80px rgba(0,0,0,0.45)",
         overflow: "hidden",
+        position: "relative",
       }}
     >
+      {/* Background texture */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `
+            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px),
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px)
+          `,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Main content */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
       {/* Header */}
       <div
         style={{
-          padding: "1.5rem",
-          borderBottom: "1px solid rgba(148, 163, 184, 0.1)",
+          padding: "1.5rem 2rem",
+          borderBottom: "3px solid #8b5a2b",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "rgba(10, 15, 30, 0.5)",
+          background: "linear-gradient(135deg, rgba(61, 34, 20, 0.95) 0%, rgba(45, 24, 16, 0.95) 100%)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(139, 90, 43, 0.3)",
         }}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "1rem",
+            gap: "1.2rem",
           }}
         >
-          <div style={{ fontSize: "1.5rem" }}>🔥</div>
+          <div style={{ fontSize: "2.5rem" }}>⚔️</div>
           <div>
             <h2
               style={{
                 margin: 0,
-                fontSize: "1.5rem",
-                color: "white",
-                fontWeight: 700,
+                fontSize: "1.8rem",
+                color: "#d4af37",
+                fontWeight: 800,
+                textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
               }}
             >
               FirstFire
@@ -128,11 +151,11 @@ export default function ChatInterface() {
             <p
               style={{
                 margin: "0.25rem 0 0 0",
-                fontSize: "0.85rem",
-                color: "#60a5fa",
+                fontSize: "0.9rem",
+                color: "#c19a6b",
               }}
             >
-              Your AI Home Assistant Guide
+              🏰 Your Viking Guide to Home Automation
             </p>
           </div>
         </div>
@@ -142,27 +165,28 @@ export default function ChatInterface() {
             onClick={() => setShowSettings(!showSettings)}
             title="Settings"
             style={{
-              width: "40px",
-              height: "40px",
+              width: "45px",
+              height: "45px",
               padding: 0,
-              background: "rgba(148, 163, 184, 0.1)",
-              border: "1px solid rgba(148, 163, 184, 0.2)",
-              borderRadius: "8px",
-              color: "#94a3b8",
+              background: "rgba(139, 90, 43, 0.4)",
+              border: "2px solid #8b5a2b",
+              borderRadius: "4px",
+              color: "#d4af37",
               cursor: "pointer",
-              fontSize: "1.2rem",
+              fontSize: "1.4rem",
               transition: "all 0.2s",
+              fontWeight: 700,
             }}
             onMouseEnter={(e) => {
               ;(e.target as HTMLButtonElement).style.background =
-                "rgba(148, 163, 184, 0.2)"
+                "rgba(139, 90, 43, 0.6)"
             }}
             onMouseLeave={(e) => {
               ;(e.target as HTMLButtonElement).style.background =
-                "rgba(148, 163, 184, 0.1)"
+                "rgba(139, 90, 43, 0.4)"
             }}
           >
-            ⚙️
+            🛡️
           </button>
         </div>
       </div>
@@ -171,9 +195,9 @@ export default function ChatInterface() {
       {showSettings && (
         <div
           style={{
-            padding: "1rem",
-            background: "rgba(30, 41, 59, 0.8)",
-            borderBottom: "1px solid rgba(148, 163, 184, 0.1)",
+            padding: "1.5rem",
+            background: "linear-gradient(135deg, rgba(61, 34, 20, 0.8) 0%, rgba(45, 24, 16, 0.8) 100%)",
+            borderBottom: "2px solid #8b5a2b",
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: "1rem",
@@ -183,32 +207,50 @@ export default function ChatInterface() {
             onClick={handleClearChat}
             style={{
               padding: "0.75rem 1rem",
-              background: "rgba(148, 163, 184, 0.1)",
-              color: "#cbd5e1",
-              border: "1px solid rgba(148, 163, 184, 0.2)",
-              borderRadius: "6px",
+              background: "rgba(139, 90, 43, 0.3)",
+              color: "#c19a6b",
+              border: "1px solid #8b5a2b",
+              borderRadius: "4px",
               cursor: "pointer",
               fontSize: "0.9rem",
               transition: "all 0.2s",
             }}
+            onMouseEnter={(e) => {
+              ;(e.target as HTMLButtonElement).style.background =
+                "rgba(139, 90, 43, 0.5)"
+              ;(e.target as HTMLButtonElement).style.color = "#d4af37"
+            }}
+            onMouseLeave={(e) => {
+              ;(e.target as HTMLButtonElement).style.background =
+                "rgba(139, 90, 43, 0.3)"
+              ;(e.target as HTMLButtonElement).style.color = "#c19a6b"
+            }}
           >
-            🗑️ Clear Chat
+            🗑️ Clear Scrolls
           </button>
 
           <button
             onClick={handleLogout}
             style={{
               padding: "0.75rem 1rem",
-              background: "rgba(239, 68, 68, 0.1)",
-              color: "#fca5a5",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              borderRadius: "6px",
+              background: "rgba(127, 29, 29, 0.2)",
+              color: "#f87171",
+              border: "1px solid rgba(220, 38, 38, 0.5)",
+              borderRadius: "4px",
               cursor: "pointer",
               fontSize: "0.9rem",
               transition: "all 0.2s",
             }}
+            onMouseEnter={(e) => {
+              ;(e.target as HTMLButtonElement).style.background =
+                "rgba(127, 29, 29, 0.4)"
+            }}
+            onMouseLeave={(e) => {
+              ;(e.target as HTMLButtonElement).style.background =
+                "rgba(127, 29, 29, 0.2)"
+            }}
           >
-            🚪 Logout
+            🚪 Depart
           </button>
         </div>
       )}
@@ -232,15 +274,18 @@ export default function ChatInterface() {
               alignItems: "center",
               justifyContent: "center",
               textAlign: "center",
-              color: "#64748b",
+              color: "#94a3b8",
             }}
           >
             <div>
               <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>
-                🤖
+                📜
               </div>
-              <p>Ask me anything about Home Assistant!</p>
-              <p style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>
+              <p style={{ color: "#d4af37", fontSize: "1.3rem", fontWeight: 600, marginBottom: "0.5rem" }}>
+                Greetings, Wanderer
+              </p>
+              <p style={{ color: "#c19a6b" }}>Ask me anything about Home Assistant!</p>
+              <p style={{ fontSize: "0.9rem", marginTop: "0.5rem", color: "#64748b" }}>
                 Setup help, configuration tips, integration guides...
               </p>
             </div>
@@ -260,17 +305,20 @@ export default function ChatInterface() {
               style={{
                 maxWidth: "70%",
                 padding: "1rem 1.5rem",
-                borderRadius: "12px",
+                borderRadius: "8px",
                 background:
                   msg.role === "user"
-                    ? "rgba(59, 130, 246, 0.2)"
-                    : "rgba(148, 163, 184, 0.1)",
+                    ? "rgba(139, 90, 43, 0.3)"
+                    : "rgba(139, 90, 43, 0.15)",
                 border: `1px solid ${
                   msg.role === "user"
-                    ? "rgba(59, 130, 246, 0.3)"
-                    : "rgba(148, 163, 184, 0.2)"
+                    ? "rgba(212, 175, 55, 0.3)"
+                    : "rgba(139, 90, 43, 0.4)"
                 }`,
-                color: "#e2e8f0",
+                color:
+                  msg.role === "user"
+                    ? "#d4af37"
+                    : "#e2e8f0",
                 lineHeight: 1.6,
               }}
             >
@@ -279,11 +327,11 @@ export default function ChatInterface() {
                 <div
                   style={{
                     fontSize: "0.75rem",
-                    color: "#94a3b8",
+                    color: "#c19a6b",
                     marginTop: "0.5rem",
                   }}
                 >
-                  {msg.tokens_used} tokens
+                  ⚡ {msg.tokens_used} runes
                 </div>
               )}
             </div>
@@ -300,13 +348,14 @@ export default function ChatInterface() {
             <div
               style={{
                 padding: "1rem 1.5rem",
-                borderRadius: "12px",
-                background: "rgba(148, 163, 184, 0.1)",
-                border: "1px solid rgba(148, 163, 184, 0.2)",
-                color: "#94a3b8",
+                borderRadius: "8px",
+                background: "rgba(139, 90, 43, 0.15)",
+                border: "1px solid rgba(139, 90, 43, 0.4)",
+                color: "#c19a6b",
+                fontStyle: "italic",
               }}
             >
-              Thinking...
+              ✨ Consulting the oracle...
             </div>
           </div>
         )}
@@ -315,14 +364,14 @@ export default function ChatInterface() {
           <div
             style={{
               padding: "1rem",
-              background: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
+              background: "rgba(127, 29, 29, 0.2)",
+              border: "1px solid rgba(220, 38, 38, 0.5)",
               borderRadius: "8px",
-              color: "#fca5a5",
+              color: "#f87171",
               fontSize: "0.9rem",
             }}
           >
-            ⚠️ {error}
+            ⚔️ {error}
           </div>
         )}
 
@@ -333,8 +382,8 @@ export default function ChatInterface() {
       <div
         style={{
           padding: "1.5rem",
-          borderTop: "1px solid rgba(148, 163, 184, 0.1)",
-          background: "rgba(10, 15, 30, 0.5)",
+          borderTop: "2px solid #8b5a2b",
+          background: "rgba(20, 15, 10, 0.7)",
         }}
       >
         <form onSubmit={handleSendMessage}>
@@ -349,18 +398,27 @@ export default function ChatInterface() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me about Home Assistant..."
+              placeholder="Ask the oracle of Home Assistant..."
               disabled={isLoading}
               style={{
                 flex: 1,
                 padding: "0.75rem 1rem",
-                background: "rgba(30, 41, 59, 0.8)",
-                border: "1px solid rgba(148, 163, 184, 0.2)",
-                borderRadius: "8px",
-                color: "#e2e8f0",
+                background: "rgba(20, 15, 10, 0.8)",
+                border: "1px solid #8b5a2b",
+                borderRadius: "4px",
+                color: "#d4af37",
                 fontSize: "1rem",
                 transition: "all 0.2s",
-                opacity: isLoading ? 0.6 : 1,
+                opacity: isLoading ? 0.5 : 1,
+              }}
+              onFocus={(e) => {
+                ;(e.target as HTMLInputElement).style.borderColor = "#d4af37"
+                ;(e.target as HTMLInputElement).style.boxShadow =
+                  "0 0 10px rgba(212, 175, 55, 0.2)"
+              }}
+              onBlur={(e) => {
+                ;(e.target as HTMLInputElement).style.borderColor = "#8b5a2b"
+                ;(e.target as HTMLInputElement).style.boxShadow = "none"
               }}
             />
             <button
@@ -370,19 +428,39 @@ export default function ChatInterface() {
                 padding: "0.75rem 1.5rem",
                 background:
                   !input.trim() || isLoading
-                    ? "rgba(59, 130, 246, 0.3)"
-                    : "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
+                    ? "rgba(139, 90, 43, 0.3)"
+                    : "linear-gradient(135deg, #c84a1a 0%, #8b3a0a 100%)",
+                color:
+                  !input.trim() || isLoading
+                    ? "#8b5a2b"
+                    : "#d4af37",
+                border: `2px solid ${
+                  !input.trim() || isLoading
+                    ? "rgba(139, 90, 43, 0.3)"
+                    : "#d4af37"
+                }`,
+                borderRadius: "4px",
                 cursor:
                   !input.trim() || isLoading ? "not-allowed" : "pointer",
                 fontSize: "1rem",
                 fontWeight: 600,
                 transition: "all 0.2s",
+                textShadow: !input.trim() || isLoading ? "none" : "1px 1px 2px rgba(0,0,0,0.5)",
+              }}
+              onMouseEnter={(e) => {
+                if (!(!input.trim() || isLoading)) {
+                  ;(e.target as HTMLButtonElement).style.transform =
+                    "translateY(-2px)"
+                  ;(e.target as HTMLButtonElement).style.boxShadow =
+                    "0 8px 16px rgba(200, 74, 26, 0.4)"
+                }
+              }}
+              onMouseLeave={(e) => {
+                ;(e.target as HTMLButtonElement).style.transform = "translateY(0)"
+                ;(e.target as HTMLButtonElement).style.boxShadow = "none"
               }}
             >
-              Send
+              ⚔️ Consult
             </button>
           </div>
         </form>
