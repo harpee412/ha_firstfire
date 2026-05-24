@@ -1,7 +1,7 @@
-name: React Python Boilerplate
-version: "1.0.2"
-slug: react_python_boilerplate
-description: React and Python Home Assistant add-on
+name: FirstFire
+version: "0.0.1"
+slug: firstfire
+description: FirstFire React and Python Home Assistant add-on
 startup: services
 boot: auto
 
