@@ -1,5 +1,6 @@
 /**
  * FirstFire Chat Interface Component
+ * Valheim-inspired design
  */
 
 import { useState, useRef, useEffect } from "react"

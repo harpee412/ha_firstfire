@@ -21,13 +21,28 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [configStatus, setConfigStatus] = useState<ConfigStatus | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Check if user already has a token saved
+  // Check if token is already configured (from HA or localStorage)
   useEffect(() => {
-    const savedToken = Storage.getToken()
-    if (savedToken) {
-      // Skip to chat if token is already saved
-      setStep("chat")
+    const checkConfig = async () => {
+      try {
+        const response = await getConfigStatus()
+        if (response.success && response.data?.configured) {
+          // Token is already configured from Home Assistant or backend
+          setStep("chat")
+          return
+        }
+      } catch (err) {
+        console.log("Could not check config status")
+      }
+
+      // Fallback: check localStorage
+      const savedToken = Storage.getToken()
+      if (savedToken) {
+        setStep("chat")
+      }
     }
+
+    checkConfig()
   }, [])
 
   const handleWelcomeStart = () => {

@@ -1,5 +1,6 @@
 /**
  * FirstFire Token Setup Screen Component
+ * Valheim-inspired design
  */
 
 import { useState } from "react"
@@ -28,7 +29,7 @@ export default function TokenSetupScreen({
 
   const handleValidate = async () => {
     if (!token.trim()) {
-      setValidationError("Please enter your API token")
+      setValidationError("Please inscribe your token rune")
       return
     }
 
@@ -42,7 +43,7 @@ export default function TokenSetupScreen({
       setValidationError(
         response.data?.error ||
         response.error?.message ||
-        "Token validation failed"
+        "The rune speaks falsely"
       )
       setIsValidating(false)
     }
@@ -58,224 +59,259 @@ export default function TokenSetupScreen({
   return (
     <div
       style={{
-        width: "100%",
-        maxWidth: "600px",
-        background: "rgba(15, 23, 42, 0.85)",
-        border: "1px solid rgba(148, 163, 184, 0.15)",
-        borderRadius: "24px",
-        padding: "3rem 2rem",
-        backdropFilter: "blur(20px)",
-        boxShadow: "0 25px 80px rgba(0,0,0,0.45)",
+        width: "100vw",
+        height: "100vh",
+        background: "linear-gradient(135deg, #2d1810 0%, #1a0f0a 50%, #0f0606 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
-      {/* Status Indicator */}
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.75rem",
-          marginBottom: "2rem",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `
+            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px),
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px)
+          `,
+          pointerEvents: "none",
+        }}
+      />
+
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "700px",
+          background: "linear-gradient(135deg, rgba(61, 34, 20, 0.95) 0%, rgba(45, 24, 16, 0.95) 100%)",
+          border: "3px solid #8b5a2b",
+          borderRadius: "8px",
+          padding: "3.5rem 3rem",
+          boxShadow: "0 0 60px rgba(0,0,0,0.8), inset 0 0 60px rgba(139, 90, 43, 0.1)",
+          position: "relative",
+          zIndex: 1,
         }}
       >
+        {/* Runic border top */}
         <div
           style={{
-            width: "12px",
-            height: "12px",
-            borderRadius: "999px",
-            background: "#fbbf24",
-            boxShadow: "0 0 12px #fbbf24",
-          }}
-        />
-        <span
-          style={{
-            color: "#94a3b8",
-            fontSize: "0.85rem",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
+            textAlign: "center",
+            marginBottom: "2rem",
+            color: "#c19a6b",
+            fontSize: "1.1rem",
+            letterSpacing: "0.3em",
+            opacity: 0.7,
           }}
         >
-          Setup Your Token
-        </span>
-      </div>
-
-      {/* Title */}
-      <h1
-        style={{
-          margin: "0 0 1rem 0",
-          fontSize: "2.5rem",
-          lineHeight: 1,
-          color: "white",
-          fontWeight: 800,
-        }}
-      >
-        API Token
-      </h1>
-
-      <p
-        style={{
-          color: "#cbd5e1",
-          fontSize: "1rem",
-          lineHeight: 1.8,
-          marginBottom: "2rem",
-        }}
-      >
-        Enter your OpenAI API token. Get one free at{" "}
-        <a
-          href="https://platform.openai.com/api-keys"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            color: "#60a5fa",
-            textDecoration: "none",
-            borderBottom: "1px solid #60a5fa",
-          }}
-        >
-          platform.openai.com/api-keys
-        </a>
-      </p>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit}>
-        {/* Token Input */}
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              color: "#e2e8f0",
-              fontSize: "0.95rem",
-              fontWeight: 500,
-            }}
-          >
-            OpenAI API Token
-          </label>
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <input
-              type={showToken ? "text" : "password"}
-              value={token}
-              onChange={handleTokenChange}
-              placeholder="sk-..."
-              disabled={isLoading || isValidating}
-              style={{
-                flex: 1,
-                padding: "0.75rem 1rem",
-                paddingRight: "2.5rem",
-                background: "rgba(30, 41, 59, 0.8)",
-                border: `1px solid ${
-                  tokenError
-                    ? "rgba(239, 68, 68, 0.3)"
-                    : "rgba(148, 163, 184, 0.2)"
-                }`,
-                borderRadius: "8px",
-                color: "#e2e8f0",
-                fontSize: "1rem",
-                transition: "all 0.2s ease",
-                opacity: isLoading || isValidating ? 0.6 : 1,
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowToken(!showToken)}
-              disabled={isLoading || isValidating}
-              style={{
-                position: "absolute",
-                right: "0.75rem",
-                background: "none",
-                border: "none",
-                color: "#94a3b8",
-                cursor: isLoading || isValidating ? "not-allowed" : "pointer",
-                fontSize: "0.9rem",
-                opacity: isLoading || isValidating ? 0.5 : 0.8,
-              }}
-            >
-              {showToken ? "Hide" : "Show"}
-            </button>
-          </div>
+          ᚦ ᛟ ᚲ ᛖ ᚾ
         </div>
 
-        {/* Error Message */}
-        {tokenError && (
-          <div
-            style={{
-              background: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              borderRadius: "8px",
-              padding: "1rem",
-              marginBottom: "1.5rem",
-              color: "#fca5a5",
-              fontSize: "0.95rem",
-            }}
-          >
-            ⚠️ {tokenError}
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={!token.trim() || isLoading || isValidating}
+        {/* Title */}
+        <h1
           style={{
-            width: "100%",
-            padding: "1rem",
-            background: !token.trim()
-              ? "rgba(59, 130, 246, 0.3)"
-              : "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: 600,
-            cursor: !token.trim() || isLoading || isValidating
-              ? "not-allowed"
-              : "pointer",
-            transition: "all 0.3s ease",
-            boxShadow: !token.trim()
-              ? "none"
-              : "0 10px 25px rgba(59, 130, 246, 0.2)",
-          }}
-          onMouseEnter={(e) => {
-            if (!token.trim() || isLoading || isValidating) return
-            ;(e.target as HTMLButtonElement).style.transform =
-              "translateY(-2px)"
-            ;(e.target as HTMLButtonElement).style.boxShadow =
-              "0 15px 35px rgba(59, 130, 246, 0.3)"
-          }}
-          onMouseLeave={(e) => {
-            ;(e.target as HTMLButtonElement).style.transform = "translateY(0)"
-            ;(e.target as HTMLButtonElement).style.boxShadow = token.trim()
-              ? "0 10px 25px rgba(59, 130, 246, 0.2)"
-              : "none"
+            margin: "0 0 1.5rem 0",
+            fontSize: "2.8rem",
+            lineHeight: 1,
+            color: "#d4af37",
+            fontWeight: 800,
+            textAlign: "center",
+            textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
           }}
         >
-          {isValidating ? "Validating..." : isLoading ? "Setting up..." : "Continue"}
-        </button>
-      </form>
+          The Oracle's Token
+        </h1>
 
-      {/* Info Box */}
-      <div
-        style={{
-          marginTop: "2rem",
-          background: "rgba(6, 78, 59, 0.2)",
-          border: "1px solid rgba(34, 197, 94, 0.2)",
-          borderRadius: "8px",
-          padding: "1rem",
-          fontSize: "0.85rem",
-          color: "#cbd5e1",
-          lineHeight: 1.6,
-        }}
-      >
-        <p style={{ margin: 0 }}>
-          ✓ Your token is only stored locally in your browser
+        <p
+          style={{
+            color: "#d9ccc3",
+            fontSize: "1rem",
+            lineHeight: 1.8,
+            marginBottom: "2.5rem",
+            textAlign: "center",
+          }}
+        >
+          Inscribe the sacred rune of the OpenAI spirits. Obtain it freely at{" "}
+          <a
+            href="https://platform.openai.com/api-keys"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "#c19a6b",
+              textDecoration: "none",
+              borderBottom: "2px solid #c19a6b",
+              fontWeight: 600,
+            }}
+          >
+            the Oracle's Chamber
+          </a>
         </p>
-        <p style={{ margin: "0.5rem 0 0 0" }}>
-          ✓ We never store or transmit your token to external servers
-        </p>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
+          {/* Token Input */}
+          <div style={{ marginBottom: "2rem" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "0.75rem",
+                color: "#d4af37",
+                fontSize: "1rem",
+                fontWeight: 600,
+                textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
+              }}
+            >
+              Spirit Rune (sk-...)
+            </label>
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <input
+                type={showToken ? "text" : "password"}
+                value={token}
+                onChange={handleTokenChange}
+                placeholder="sk-..."
+                disabled={isLoading || isValidating}
+                style={{
+                  flex: 1,
+                  padding: "0.9rem 1rem",
+                  paddingRight: "2.5rem",
+                  background: "rgba(20, 10, 5, 0.8)",
+                  border: `2px solid ${
+                    tokenError ? "#c84a1a" : "#8b5a2b"
+                  }`,
+                  borderRadius: "4px",
+                  color: "#d9ccc3",
+                  fontSize: "1rem",
+                  transition: "all 0.2s ease",
+                  opacity: isLoading || isValidating ? 0.6 : 1,
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowToken(!showToken)}
+                disabled={isLoading || isValidating}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  background: "none",
+                  border: "none",
+                  color: "#c19a6b",
+                  cursor: isLoading || isValidating ? "not-allowed" : "pointer",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  opacity: isLoading || isValidating ? 0.5 : 0.9,
+                }}
+              >
+                {showToken ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {tokenError && (
+            <div
+              style={{
+                background: "rgba(200, 74, 26, 0.15)",
+                border: "2px solid #c84a1a",
+                borderRadius: "4px",
+                padding: "1rem",
+                marginBottom: "2rem",
+                color: "#e8a76a",
+                fontSize: "0.95rem",
+              }}
+            >
+              ⚠️ {tokenError}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={!token.trim() || isLoading || isValidating}
+            style={{
+              width: "100%",
+              padding: "1.1rem",
+              background: !token.trim()
+                ? "rgba(139, 90, 43, 0.3)"
+                : "linear-gradient(135deg, #c84a1a 0%, #8b3a0a 100%)",
+              color: !token.trim() ? "#a89678" : "#ffd700",
+              border: `2px solid ${!token.trim() ? "#8b5a2b" : "#d4af37"}`,
+              borderRadius: "4px",
+              fontSize: "1rem",
+              fontWeight: 700,
+              cursor: !token.trim() || isLoading || isValidating
+                ? "not-allowed"
+                : "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: !token.trim()
+                ? "none"
+                : "0 8px 20px rgba(200, 74, 26, 0.3)",
+              textShadow: !token.trim() ? "none" : "1px 1px 2px rgba(0,0,0,0.5)",
+              letterSpacing: "0.05em",
+            }}
+            onMouseEnter={(e) => {
+              if (!token.trim() || isLoading || isValidating) return
+              ;(e.target as HTMLButtonElement).style.transform =
+                "translateY(-2px)"
+              ;(e.target as HTMLButtonElement).style.boxShadow =
+                "0 12px 30px rgba(200, 74, 26, 0.5)"
+            }}
+            onMouseLeave={(e) => {
+              ;(e.target as HTMLButtonElement).style.transform = "translateY(0)"
+              ;(e.target as HTMLButtonElement).style.boxShadow = token.trim()
+                ? "0 8px 20px rgba(200, 74, 26, 0.3)"
+                : "none"
+            }}
+          >
+            {isValidating ? "Testing Rune..." : isLoading ? "Binding Spirit..." : "INSCRIBE & ADVANCE"}
+          </button>
+        </form>
+
+        {/* Info Box */}
+        <div
+          style={{
+            marginTop: "2.5rem",
+            background: "rgba(45, 24, 16, 0.6)",
+            border: "2px solid #8b5a2b",
+            borderRadius: "4px",
+            padding: "1.25rem",
+            fontSize: "0.9rem",
+            color: "#d9ccc3",
+            lineHeight: 1.7,
+            textAlign: "center",
+          }}
+        >
+          <p style={{ margin: "0 0 0.5rem 0", fontWeight: 600, color: "#c19a6b" }}>
+            🔐 Sacred Trust
+          </p>
+          <p style={{ margin: 0 }}>
+            Your rune dwells only within your realm. Never sent beyond your walls.
+          </p>
+        </div>
+
+        {/* Runic border bottom */}
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: "2rem",
+            color: "#c19a6b",
+            fontSize: "1.1rem",
+            letterSpacing: "0.3em",
+            opacity: 0.7,
+          }}
+        >
+          ᚦ ᛟ ᚲ ᛖ ᚾ
+        </div>
       </div>
     </div>
   )

@@ -114,15 +114,34 @@ class ConfigManager:
     def _load_config(self) -> FirstFireConfig:
         """
         Load configuration from multiple sources in priority order:
-        1. Environment variables
-        2. config.yaml (if found)
-        3. Defaults
+        1. Home Assistant options.json (highest priority - user config)
+        2. Environment variables
+        3. config.yaml defaults
+        4. Code defaults
         """
         config_data = {}
 
-        # Load from environment variables (highest priority)
+        # Load from Home Assistant options.json (highest priority)
+        try:
+            options_path = Path("/data/options.json")
+            if options_path.exists():
+                import json
+                with open(options_path, "r") as f:
+                    ha_options = json.load(f)
+                    if "openai_token" in ha_options and ha_options["openai_token"]:
+                        config_data["openai_token"] = ha_options["openai_token"]
+                    if "model" in ha_options and ha_options["model"]:
+                        config_data["model"] = ha_options["model"]
+                    if "max_tokens" in ha_options and ha_options["max_tokens"]:
+                        config_data["max_tokens"] = ha_options["max_tokens"]
+                    if "system_prompt" in ha_options and ha_options["system_prompt"]:
+                        config_data["system_prompt"] = ha_options["system_prompt"]
+        except Exception as e:
+            print(f"Note: Could not load Home Assistant options.json: {e}")
+
+        # Load from environment variables (if not set by HA options)
         env_token = os.getenv("OPENAI_API_KEY")
-        if env_token:
+        if env_token and "openai_token" not in config_data:
             config_data["openai_token"] = env_token
 
         env_model = os.getenv("OPENAI_MODEL")
