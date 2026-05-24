@@ -1,7 +1,7 @@
 name: FirstFire
 version: "0.1.0"
 slug: firstfire
-description: FirstFire - AI-Powered Home Assistant Onboarding with OpenAI Integration
+description: FirstFire - AI-Powered Home Assistant Onboarding with OpenAI
 startup: services
 boot: auto
 
@@ -12,7 +12,6 @@ arch:
 
 ingress: true
 ingress_port: 8099
-panel_icon: mdi:fire
 
 homeassistant_api: true
 
@@ -23,26 +22,3 @@ ports_description:
   8099/tcp: Web UI
 
 init: false
-
-options:
-  openai_token: ""
-  max_tokens: 500
-  model: "gpt-4-turbo"
-
-schema:
-  - id: openai_token
-    name: OpenAI API Token
-    description: Your OpenAI API key. Get one at https://platform.openai.com/api-keys
-    type: string
-
-  - id: max_tokens
-    name: Max Tokens per Response
-    description: Maximum tokens for AI responses (100-4000, default 500)
-    type: integer
-    default: 500
-
-  - id: model
-    name: OpenAI Model
-    description: Which OpenAI model to use for responses
-    type: string
-    default: gpt-4-turbo
