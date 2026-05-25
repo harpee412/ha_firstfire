@@ -251,16 +251,56 @@ User Question: {user_message}"""
             return "off"  # Default to off for ambiguous requests
 
     async def _execute_control_action(self, action: str, entity_id: str) -> Dict[str, Any]:
-        """Execute a control action on an entity. Must be overridden by subclasses."""
-        # Default implementation - subclasses should override
-        if action == "on":
-            return await self.ha_client.turn_on_entity(entity_id)
-        elif action == "off":
-            return await self.ha_client.turn_off_entity(entity_id)
-        elif action == "toggle":
-            return await self.ha_client.toggle_entity(entity_id)
-        else:
-            return {"success": False, "error": f"Unknown action: {action}"}
+        """Execute a control action on an entity and verify state change."""
+        try:
+            # Call the action
+            if action == "on":
+                result = await self.ha_client.turn_on_entity(entity_id)
+                expected_state = "on"
+            elif action == "off":
+                result = await self.ha_client.turn_off_entity(entity_id)
+                expected_state = "off"
+            elif action == "toggle":
+                result = await self.ha_client.toggle_entity(entity_id)
+                expected_state = None  # Don't verify for toggle, just check it changed
+            else:
+                return {"success": False, "error": f"Unknown action: {action}"}
+
+            # Verify the state changed
+            state_result = await self.ha_client.get_entity_state(entity_id)
+            if state_result.get("success"):
+                actual_state = state_result.get("data", {}).get("state", "unknown")
+
+                if expected_state:
+                    # For on/off, check if state matches
+                    result["verification"] = {
+                        "verified": True,
+                        "expected_state": expected_state,
+                        "actual_state": actual_state,
+                        "success": actual_state == expected_state
+                    }
+                else:
+                    # For toggle, just confirm we got a state
+                    result["verification"] = {
+                        "verified": True,
+                        "actual_state": actual_state,
+                        "success": actual_state in ["on", "off"]
+                    }
+            else:
+                # Couldn't verify
+                result["verification"] = {
+                    "verified": False,
+                    "error": "Could not verify state after action"
+                }
+
+            return result
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Error executing action: {str(e)}",
+                "verification": {"verified": False, "error": str(e)}
+            }
 
     def _parse_intent(self, user_message: str) -> str:
         """
@@ -285,13 +325,30 @@ User Question: {user_message}"""
         """
         Find entities matching user's description using fuzzy matching
 
-        Returns list of matching entities, sorted by relevance.
+        STRICT MATCHING to avoid over-matching:
+        - Filters out generic/control words
+        - Requires meaningful keyword matches (not just domain name)
+        - Returns only top 3 matches max to prevent controlling entire house
+
         Example: "basement desk" matches "light.basement_desk_light1"
         """
         if not entities:
             return []
 
-        query_words = user_query.lower().split()
+        # Filter out generic/control words that appear in everything
+        generic_words = {
+            "turn", "on", "off", "toggle", "switch",
+            "set", "change", "adjust", "dim", "brighten",
+            "the", "a", "an", "and", "or", "is", "are", "to", "at",
+            "can", "you", "please", "thank", "thanks"
+        }
+
+        query_words = [w for w in user_query.lower().split() if w not in generic_words]
+
+        # If no meaningful words left, can't match reliably
+        if not query_words:
+            return []
+
         matches = []
 
         for entity in entities:
@@ -308,18 +365,25 @@ User Question: {user_message}"""
             name_parts = friendly_name.lower().replace("-", " ").split()
 
             # Score: how many query words are in the entity
+            matched_words = 0
             for word in query_words:
                 if word in entity_parts or word in name_parts:
-                    score += 2
-                # Partial matches
-                if any(word in part for part in entity_parts + name_parts):
+                    score += 3  # Exact word match
+                    matched_words += 1
+                # Partial matches (word appears within a part)
+                elif any(word in part for part in entity_parts + name_parts):
                     score += 1
 
-            if score > 0:
+            # Require at least one meaningful word match (not just domain)
+            if matched_words > 0:
                 matches.append((score, entity))
 
-        # Return sorted by relevance (highest score first)
-        return [entity for score, entity in sorted(matches, key=lambda x: x[0], reverse=True)]
+        # Sort by relevance and return only top 3 matches
+        # This prevents "turn off light" from affecting the entire house
+        sorted_matches = sorted(matches, key=lambda x: x[0], reverse=True)
+        top_matches = [entity for score, entity in sorted_matches[:3]]
+
+        return top_matches
 
     async def _fetch_domain_data(self, intent: str) -> str:
         """
