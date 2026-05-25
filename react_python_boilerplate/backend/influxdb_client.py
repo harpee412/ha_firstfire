@@ -1,5 +1,6 @@
 """
 InfluxDB Client - Access historical time-series data from Home Assistant
+Supports both InfluxDB 1.x (username/password) and 2.x (token-based) authentication
 """
 
 import os
@@ -7,43 +8,85 @@ from typing import Optional, Dict, List, Any
 from datetime import datetime, timedelta
 import json
 
+# Try to import InfluxDB 2.x client first, fall back to 1.x
 try:
-    from influxdb_client import InfluxDBClient, Point
+    from influxdb_client import InfluxDBClient as InfluxDB2Client
     from influxdb_client.client.query_api import QueryApi
-    INFLUXDB_AVAILABLE = True
+    INFLUXDB_2_AVAILABLE = True
 except ImportError:
-    INFLUXDB_AVAILABLE = False
+    INFLUXDB_2_AVAILABLE = False
+
+try:
+    from influxdb import InfluxDBClient as InfluxDB1Client
+    INFLUXDB_1_AVAILABLE = True
+except ImportError:
+    INFLUXDB_1_AVAILABLE = False
+
+INFLUXDB_AVAILABLE = INFLUXDB_2_AVAILABLE or INFLUXDB_1_AVAILABLE
 
 
 class InfluxDBConnector:
-    """Connect to and query InfluxDB for time-series data"""
+    """Connect to and query InfluxDB for time-series data
 
-    def __init__(self, url: str, token: str, org: str, bucket: str):
+    Supports:
+    - InfluxDB 2.x with token authentication
+    - InfluxDB 1.x with username/password authentication
+    """
+
+    def __init__(self, url: str, token_or_password: str, org_or_database: str = None,
+                 bucket: str = None, username: str = None, use_v1: bool = False):
         """
         Initialize InfluxDB connection
 
         Args:
             url: InfluxDB URL (e.g., "http://influxdb:8086")
-            token: API token for authentication
-            org: Organization name
-            bucket: Bucket name (typically "home_assistant")
+            token_or_password: API token (v2) or password (v1)
+            org_or_database: Organization (v2) or database name (v1)
+            bucket: Bucket name (v2 only, typically "home_assistant")
+            username: Username for v1 authentication
+            use_v1: Force use of InfluxDB 1.x
         """
         self.url = url
-        self.token = token
-        self.org = org
-        self.bucket = bucket
-        self.client: Optional[InfluxDBClient] = None
-        self.query_api: Optional[QueryApi] = None
+        self.client = None
+        self.query_api = None
+        self.is_v1 = use_v1
 
-        if INFLUXDB_AVAILABLE:
-            try:
-                self.client = InfluxDBClient(url=url, token=token, org=org)
+        if not INFLUXDB_AVAILABLE:
+            print("InfluxDB client not available")
+            return
+
+        try:
+            # Try InfluxDB 1.x if username provided or v1 forced
+            if (username and token_or_password) or (use_v1 and INFLUXDB_1_AVAILABLE):
+                if INFLUXDB_1_AVAILABLE:
+                    print(f"Connecting to InfluxDB 1.x at {url}")
+                    self.client = InfluxDB1Client(
+                        host=url.replace("http://", "").replace("https://", "").split(":")[0],
+                        port=int(url.split(":")[-1]) if ":" in url else 8086,
+                        username=username or "admin",
+                        password=token_or_password,
+                        database=org_or_database or "homeassistant",
+                    )
+                    self.is_v1 = True
+                    self._test_connection()
+                    return
+
+            # Fall back to InfluxDB 2.x
+            if INFLUXDB_2_AVAILABLE:
+                print(f"Connecting to InfluxDB 2.x at {url}")
+                self.client = InfluxDB2Client(
+                    url=url,
+                    token=token_or_password,
+                    org=org_or_database or "home-assistant"
+                )
                 self.query_api = self.client.query_api()
+                self.is_v1 = False
                 self._test_connection()
-            except Exception as e:
-                print(f"Failed to connect to InfluxDB: {e}")
-                self.client = None
-                self.query_api = None
+
+        except Exception as e:
+            print(f"Failed to connect to InfluxDB: {e}")
+            self.client = None
+            self.query_api = None
 
     def _test_connection(self) -> bool:
         """Test if connection is working"""
@@ -257,19 +300,29 @@ def set_influxdb_client(client: Optional[InfluxDBConnector]):
     _influxdb_instance = client
 
 
-def init_influxdb(url: str, token: str, org: str, bucket: str) -> InfluxDBConnector:
+def init_influxdb(url: str, token_or_password: str, org_or_database: str = None,
+                   bucket: str = None, username: str = None, use_v1: bool = False) -> InfluxDBConnector:
     """
-    Initialize InfluxDB connection
+    Initialize InfluxDB connection (supports v1.x and v2.x)
 
     Args:
         url: InfluxDB URL
-        token: API token
-        org: Organization name
-        bucket: Bucket name
+        token_or_password: API token (v2) or password (v1)
+        org_or_database: Organization (v2) or database name (v1)
+        bucket: Bucket name (v2 only)
+        username: Username (v1 only)
+        use_v1: Force use of InfluxDB 1.x
 
     Returns:
         InfluxDBConnector instance
     """
-    client = InfluxDBConnector(url, token, org, bucket)
+    client = InfluxDBConnector(
+        url=url,
+        token_or_password=token_or_password,
+        org_or_database=org_or_database,
+        bucket=bucket,
+        username=username,
+        use_v1=use_v1
+    )
     set_influxdb_client(client)
     return client

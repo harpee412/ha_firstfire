@@ -41,15 +41,23 @@ class FirstFireConfig(BaseModel):
     )
     influxdb_token: Optional[str] = Field(
         default=None,
-        description="InfluxDB API token for authentication"
+        description="InfluxDB API token (v2) or password (v1)"
+    )
+    influxdb_username: Optional[str] = Field(
+        default=None,
+        description="InfluxDB username (v1 only)"
     )
     influxdb_org: Optional[str] = Field(
         default="home-assistant",
-        description="InfluxDB organization name"
+        description="InfluxDB organization name (v2) or database name (v1)"
     )
     influxdb_bucket: Optional[str] = Field(
         default="home_assistant",
-        description="InfluxDB bucket name"
+        description="InfluxDB bucket name (v2 only)"
+    )
+    influxdb_v1: Optional[bool] = Field(
+        default=False,
+        description="Use InfluxDB 1.x authentication (username/password instead of token)"
     )
 
     @field_validator("model")
@@ -254,30 +262,37 @@ class ConfigManager:
     def update_influxdb(
         self,
         url: str,
-        token: str,
-        org: Optional[str] = None,
+        token_or_password: str,
+        org_or_database: Optional[str] = None,
         bucket: Optional[str] = None,
+        username: Optional[str] = None,
+        use_v1: bool = False,
     ) -> tuple[bool, Optional[str]]:
         """
         Update InfluxDB configuration
 
         Args:
             url: InfluxDB URL
-            token: InfluxDB API token
-            org: Organization name (optional, uses default if not provided)
-            bucket: Bucket name (optional, uses default if not provided)
+            token_or_password: API token (v2) or password (v1)
+            org_or_database: Organization (v2) or database name (v1)
+            bucket: Bucket name (v2 only)
+            username: Username (v1 only)
+            use_v1: Force use of InfluxDB 1.x
 
         Returns:
             Tuple of (success: bool, error_message: Optional[str])
         """
         try:
-            if not url or not token:
-                return False, "URL and token are required"
+            if not url or not token_or_password:
+                return False, "URL and token/password are required"
 
             self.config.influxdb_url = url
-            self.config.influxdb_token = token
-            if org:
-                self.config.influxdb_org = org
+            self.config.influxdb_token = token_or_password
+            self.config.influxdb_username = username
+            self.config.influxdb_v1 = use_v1
+
+            if org_or_database:
+                self.config.influxdb_org = org_or_database
             if bucket:
                 self.config.influxdb_bucket = bucket
 

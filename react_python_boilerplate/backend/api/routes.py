@@ -64,9 +64,11 @@ class ModelInfo(BaseModel):
 class InfluxDBConfigRequest(BaseModel):
     """InfluxDB configuration request"""
     url: str = Field(..., min_length=1)
-    token: str = Field(..., min_length=1)
+    token: str = Field(..., min_length=1, description="API token (v2) or password (v1)")
     org: Optional[str] = "home-assistant"
     bucket: Optional[str] = "home_assistant"
+    username: Optional[str] = None
+    use_v1: Optional[bool] = False
 
 
 class InfluxDBStatus(BaseModel):
@@ -316,14 +318,16 @@ async def chat(request: ChatRequest) -> ChatResponse:
 
 @router.post("/influxdb/config", response_model=ChatResponse)
 async def configure_influxdb(request: InfluxDBConfigRequest) -> ChatResponse:
-    """Configure InfluxDB connection for analytics"""
+    """Configure InfluxDB connection for analytics (supports v1.x and v2.x)"""
     try:
         config_manager = get_config_manager()
         success, error = config_manager.update_influxdb(
             url=request.url,
-            token=request.token,
-            org=request.org,
+            token_or_password=request.token,
+            org_or_database=request.org,
             bucket=request.bucket,
+            username=request.username,
+            use_v1=request.use_v1 or bool(request.username),  # Use v1 if username provided
         )
 
         if not success:
@@ -336,9 +340,11 @@ async def configure_influxdb(request: InfluxDBConfigRequest) -> ChatResponse:
         try:
             client = init_influxdb(
                 url=request.url,
-                token=request.token,
-                org=request.org or "home-assistant",
+                token_or_password=request.token,
+                org_or_database=request.org or ("homeassistant" if request.username else "home-assistant"),
                 bucket=request.bucket or "home_assistant",
+                username=request.username,
+                use_v1=request.use_v1 or bool(request.username),
             )
 
             if client.is_connected():

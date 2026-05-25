@@ -6,3 +6,4 @@ openai==1.59.2
 pydantic==2.10.2
 PyYAML==6.0.1
 influxdb-client==1.18.0
+influxdb==5.3.1
