@@ -64,37 +64,46 @@ Always respond in Markdown format. When showing automations:
 
 Be helpful and practical. Focus on creating useful automations that improve daily life."""
 
-    async def process_message(self, user_message: str) -> Dict[str, Any]:
+    async def process_message(self, user_message: str, history: list = None) -> Dict[str, Any]:
         """
         Process message with automation-specific context
 
         Args:
             user_message: User's question about automations
+            history: Conversation history for context
 
         Returns:
             Dict with response, token count, and metadata
         """
         try:
+            history = history or []
+
             # Parse intent
             intent = self._parse_intent(user_message)
 
             # Fetch automation data based on intent
             auto_context = await self._fetch_automation_context(intent)
 
-            # Prepare messages
+            # Build messages with conversation history
             messages = [
                 {
                     "role": "system",
                     "content": self.system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": f"""Current Automation Status:
+                }
+            ]
+
+            # Add conversation history
+            if history:
+                messages.extend(history)
+
+            # Add current context and question
+            messages.append({
+                "role": "user",
+                "content": f"""Current Automation Status:
 {auto_context}
 
 User Question: {user_message}"""
-                }
-            ]
+            })
 
             response = await self.client.chat.completions.create(
                 model=self.model,

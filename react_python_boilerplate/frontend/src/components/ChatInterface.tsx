@@ -1,6 +1,6 @@
 /**
  * FirstFire Chat Interface Component
- * Cyberpunk/Sci-Fi Design with Markdown rendering
+ * Cyberpunk/Sci-Fi Design with Markdown rendering and Noto Font
  */
 
 import { useState, useRef, useEffect } from "react"
@@ -99,10 +99,13 @@ export default function ChatInterface() {
         flexDirection: "column",
         overflow: "hidden",
         position: "relative",
-        fontFamily: "'Space Mono', monospace",
+        fontFamily: '"Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         color: CSS_VARS.text,
       }}
     >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&family=Noto+Sans+Mono:wght@400;600&display=swap');
+      `}</style>
       {/* Scanline overlay */}
       <div
         style={{
@@ -154,7 +157,7 @@ export default function ChatInterface() {
         <div>
           <h1
             style={{
-              fontFamily: "'Space Mono', monospace",
+              fontFamily: "'Noto Sans Mono', monospace",
               fontSize: "1.2rem",
               fontWeight: 800,
               letterSpacing: "0.05em",
@@ -235,7 +238,7 @@ export default function ChatInterface() {
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               transition: "all 0.2s",
-              fontFamily: "'Space Mono', monospace",
+              fontFamily: "'Noto Sans Mono', monospace",
             }}
             onMouseEnter={(e) => {
               ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent2
@@ -265,7 +268,7 @@ export default function ChatInterface() {
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               transition: "all 0.2s",
-              fontFamily: "'Space Mono', monospace",
+              fontFamily: "'Noto Sans Mono', monospace",
             }}
             onMouseEnter={(e) => {
               ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent2
@@ -401,7 +404,7 @@ export default function ChatInterface() {
                       </li>
                     ),
                     code: ({ children }) => (
-                      <code style={{ background: CSS_VARS.surface2, padding: "0.2rem 0.4rem", borderRadius: "3px", color: CSS_VARS.accent3, fontFamily: "'Space Mono', monospace", fontSize: "0.8rem" }}>
+                      <code style={{ background: CSS_VARS.surface2, padding: "0.2rem 0.4rem", borderRadius: "3px", color: CSS_VARS.accent3, fontFamily: "'Noto Sans Mono', monospace", fontSize: "0.8rem" }}>
                         {children}
                       </code>
                     ),
@@ -515,7 +518,7 @@ export default function ChatInterface() {
                 fontSize: "0.85rem",
                 transition: "all 0.2s",
                 opacity: isLoading ? 0.5 : 1,
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'Noto Sans Mono', monospace",
               }}
               onFocus={(e) => {
                 ;(e.target as HTMLInputElement).style.borderColor = CSS_VARS.accent
@@ -557,7 +560,7 @@ export default function ChatInterface() {
                   !input.trim() || isLoading
                     ? "none"
                     : "0 0 15px rgba(0,229,255,0.3)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'Noto Sans Mono', monospace",
               }}
               onMouseEnter={(e) => {
                 if (!(!input.trim() || isLoading)) {

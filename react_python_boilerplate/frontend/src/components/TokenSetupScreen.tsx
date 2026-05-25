@@ -1,6 +1,6 @@
 /**
  * FirstFire Token Setup Screen Component
- * Cyberpunk/Sci-Fi Design
+ * Cyberpunk/Sci-Fi Design with Noto Font
  */
 
 import { useState } from "react"
@@ -80,8 +80,12 @@ export default function TokenSetupScreen({
         padding: "2rem",
         overflow: "hidden",
         position: "relative",
+        fontFamily: '"Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&family=Noto+Sans+Mono:wght@400;600&display=swap');
+      `}</style>
       {/* Scanline overlay */}
       <div
         style={{
@@ -193,7 +197,7 @@ export default function TokenSetupScreen({
                   borderRadius: "6px",
                   color: CSS_VARS.text,
                   fontSize: "0.9rem",
-                  fontFamily: "'Space Mono', monospace",
+                  fontFamily: "'Noto Sans Mono', monospace",
                   transition: "all 0.2s ease",
                   opacity: isLoading || isValidating ? 0.6 : 1,
                 }}
