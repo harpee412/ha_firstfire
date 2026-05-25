@@ -123,38 +123,55 @@ User Question: {user_message}"""
             }
 
     async def _gather_system_context(self) -> str:
-        """Gather current system state for context"""
+        """Gather minimal system context (only counts/summary, not raw data)"""
         context_parts = []
 
-        # System info
-        sys_info = await self.ha_client.get_system_info()
-        if sys_info.get("success"):
-            info = sys_info.get("data", {})
-            context_parts.append(f"**Version:** {info.get('version', 'Unknown')}")
-            context_parts.append(f"**Unit Name:** {info.get('unit_name', 'Unknown')}")
+        try:
+            # System info
+            sys_info = await self.ha_client.get_system_info()
+            if sys_info.get("success"):
+                info = sys_info.get("data", {})
+                context_parts.append(f"**Version:** {info.get('version', 'Unknown')}")
+                context_parts.append(f"**Unit Name:** {info.get('unit_name', 'Unknown')}")
+        except:
+            pass
 
-        # Entity count
-        entities = await self.ha_client.get_entities()
-        if entities.get("success"):
-            entity_list = entities.get("data", [])
-            entity_counts = self._count_entity_types(entity_list)
-            context_parts.append(f"**Total Entities:** {len(entity_list)}")
-            for etype, count in entity_counts.items():
-                context_parts.append(f"  - {etype}: {count}")
+        try:
+            # Entity count only (no raw data)
+            entities = await self.ha_client.get_entities()
+            if entities.get("success"):
+                entity_list = entities.get("data", [])
+                entity_counts = self._count_entity_types(entity_list)
+                context_parts.append(f"**Total Entities:** {len(entity_list)}")
+                # Show only top entity types
+                top_types = sorted(entity_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+                for etype, count in top_types:
+                    context_parts.append(f"  - {etype}: {count}")
+        except:
+            pass
 
-        # Automation count
-        automations = await self.ha_client.get_automations()
-        if automations.get("success"):
-            auto_list = automations.get("data", [])
-            context_parts.append(f"**Automations:** {len(auto_list)}")
+        try:
+            # Automation count only
+            automations = await self.ha_client.get_automations()
+            if automations.get("success"):
+                auto_list = automations.get("data", [])
+                context_parts.append(f"**Automations:** {len(auto_list)}")
+        except:
+            pass
 
-        # Integration count
-        integrations = await self.ha_client.get_integrations()
-        if integrations.get("success"):
-            int_list = integrations.get("data", [])
-            context_parts.append(f"**Integrations:** {len(int_list)}")
+        try:
+            # Integration count only
+            integrations = await self.ha_client.get_integrations()
+            if integrations.get("success"):
+                int_list = integrations.get("data", [])
+                context_parts.append(f"**Integrations:** {len(int_list)}")
+        except:
+            pass
 
-        return "\n".join(context_parts) if context_parts else "System context unavailable"
+        if not context_parts:
+            context_parts.append("**Status:** System context gathering")
+
+        return "\n".join(context_parts)
 
     def _count_entity_types(self, entities: list) -> Dict[str, int]:
         """Count entities by type"""
