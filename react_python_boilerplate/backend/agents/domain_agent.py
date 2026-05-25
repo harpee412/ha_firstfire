@@ -70,12 +70,14 @@ Your role is to:
 6. Guide users through setup and configuration
 
 IMPORTANT - You can take action:
-- When user asks to control {self.domain_name}, execute the action
-- Always confirm what you're about to do before executing
-- If multiple entities match, ask user to clarify which one
-- Report success/failure clearly
+- When user asks to control {self.domain_name}, I've pre-matched relevant entities to their request
+- Use the "Matching entities found" list to identify what they want
+- If one clear match exists, execute it with a confirmation ("Turning off basement desk light...")
+- If multiple matches, show them and ask which one they meant
+- Report success/failure clearly with new state
 
 Context: You have full access to current {self.domain_name} data and control.
+The matching entities are already identified for you - just use them.
 
 Always respond in Markdown format for clarity. Be concise and focused on {self.domain_name}.
 When showing state or configuration, use code blocks and lists for readability."""
@@ -97,7 +99,31 @@ When showing state or configuration, use code blocks and lists for readability."
             # Step 2: Fetch only data needed for this intent
             domain_data = await self._fetch_domain_data(intent)
 
-            # Step 3: Call Claude with focused context
+            # Step 3: For control intents, try to find matching entities
+            entity_matches = ""
+            if intent == "control":
+                entities_result = await self.ha_client.get_entities()
+                if entities_result.get("success"):
+                    all_entities = entities_result.get("data", [])
+                    domain_entities = [
+                        e for e in all_entities
+                        if e.get("entity_id", "").startswith(f"{self.domain}.")
+                    ]
+                    matches = self._find_matching_entities(user_message, domain_entities)
+                    if matches:
+                        entity_matches = "\n\nMatching entities found:\n"
+                        for entity in matches[:5]:  # Top 5 matches
+                            name = entity.get("attributes", {}).get("friendly_name", entity.get("entity_id"))
+                            entity_id = entity.get("entity_id")
+                            state = entity.get("state")
+                            entity_matches += f"- **{name}** (`{entity_id}`) - State: {state}\n"
+
+            # Step 4: Call Claude with focused context
+            user_context = f"""Current {self.domain_name} Status:
+{domain_data}{entity_matches}
+
+User Question: {user_message}"""
+
             messages = [
                 {
                     "role": "system",
@@ -105,10 +131,7 @@ When showing state or configuration, use code blocks and lists for readability."
                 },
                 {
                     "role": "user",
-                    "content": f"""Current {self.domain_name} Status:
-{domain_data}
-
-User Question: {user_message}"""
+                    "content": user_context
                 }
             ]
 
@@ -163,6 +186,46 @@ User Question: {user_message}"""
             return "help"
         else:
             return "general"
+
+    def _find_matching_entities(self, user_query: str, entities: List[Dict]) -> List[Dict]:
+        """
+        Find entities matching user's description using fuzzy matching
+
+        Returns list of matching entities, sorted by relevance.
+        Example: "basement desk" matches "light.basement_desk_light1"
+        """
+        if not entities:
+            return []
+
+        query_words = user_query.lower().split()
+        matches = []
+
+        for entity in entities:
+            entity_id = entity.get("entity_id", "")
+            friendly_name = entity.get("attributes", {}).get("friendly_name", "").lower()
+
+            # Score based on matching words
+            score = 0
+
+            # Check entity_id (e.g., "light.basement_desk_light1" → "basement", "desk", "light1")
+            entity_parts = entity_id.lower().replace(".", "_").replace("-", "_").split("_")
+
+            # Check friendly_name (e.g., "Basement Desk Light" → "basement", "desk", "light")
+            name_parts = friendly_name.lower().replace("-", " ").split()
+
+            # Score: how many query words are in the entity
+            for word in query_words:
+                if word in entity_parts or word in name_parts:
+                    score += 2
+                # Partial matches
+                if any(word in part for part in entity_parts + name_parts):
+                    score += 1
+
+            if score > 0:
+                matches.append((score, entity))
+
+        # Return sorted by relevance (highest score first)
+        return [entity for score, entity in sorted(matches, key=lambda x: x[0], reverse=True)]
 
     async def _fetch_domain_data(self, intent: str) -> str:
         """
