@@ -19,8 +19,7 @@ import {
 import WelcomeScreen from "./components/WelcomeScreen"
 import TokenSetupScreen from "./components/TokenSetupScreen"
 import ConfirmationScreen from "./components/ConfirmationScreen"
-import Dashboard from "./components/Dashboard"
-import ChatInterface from "./components/ChatInterface"
+import MainLayout from "./components/MainLayout"
 
 interface OnboardingFlowProps {
   onComplete?: () => void
@@ -165,18 +164,8 @@ export default function OnboardingFlow({
         )
 
       case "dashboard":
-        return (
-          <Dashboard
-            onNavigateToChat={() => setStep("chat")}
-          />
-        )
-
       case "chat":
-        return (
-          <ChatInterface
-            onBackToDashboard={() => setStep("dashboard")}
-          />
-        )
+        return <MainLayout />
 
       default:
         return null
