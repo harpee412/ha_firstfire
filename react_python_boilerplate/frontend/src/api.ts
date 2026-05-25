@@ -12,7 +12,26 @@ import {
   OpenAIModel,
 } from "./types"
 
-const API_BASE = "./api"
+// Detect Home Assistant ingress proxy context
+// In HA ingress, window.location.pathname is something like: /api/addons/abc123/proxy/
+// We need to use that as the base for API calls
+const getAPIBase = (): string => {
+  // Check if we're in a Home Assistant context by looking for the proxy path pattern
+  const path = window.location.pathname
+
+  // Home Assistant ingress proxy pattern: /api/addons/{addon_id}/proxy/
+  const proxyMatch = path.match(/^(.*\/proxy)\/$/)
+
+  if (proxyMatch) {
+    // We're in Home Assistant ingress, use the proxy path
+    return `${proxyMatch[1]}/api`
+  }
+
+  // Otherwise, use relative path (local development)
+  return "./api"
+}
+
+const API_BASE = getAPIBase()
 
 /**
  * Generic API call handler
