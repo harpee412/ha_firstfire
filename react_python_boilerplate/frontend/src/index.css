@@ -1,27 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap");
+
 :root {
-  --text: #d9ccc3;
-  --text-h: #f3e6d8;
+  /* Core Colors */
+  --bg: #0a0c10;
+  --surface: #111420;
+  --surface2: #181d2e;
 
-  --bg: #020617;
-  --border: #8b5a2b;
+  --border: #1e2540;
 
-  --sans:
-    Inter,
+  --accent: #00e5ff;
+  --accent2: #ff3d71;
+  --accent3: #39ff14;
+
+  --text: #e8eaf6;
+  --text-muted: #5c6394;
+
+  /* Effects */
+  --glow:
+    0 0 20px rgba(0, 229, 255, 0.25);
+
+  --glow-strong:
+    0 0 30px rgba(0, 229, 255, 0.45);
+
+  --shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45);
+
+  /* Typography */
+  --font-display:
+    "Syne",
     system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
     sans-serif;
 
-  --mono:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
+  --font-body:
+    "Space Mono",
     monospace;
 
-  font-family: var(--sans);
+  /* Layout */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --transition-fast: 0.15s ease;
+  --transition-med: 0.25s ease;
+
+  font-family: var(--font-body);
 
   color: var(--text);
   background: var(--bg);
@@ -32,6 +54,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* =========================
+   RESET
+========================= */
 
 *,
 *::before,
@@ -51,13 +77,47 @@ body,
 
 body {
   overflow-x: hidden;
-  background: #020617;
+  background: var(--bg);
+  color: var(--text);
+  position: relative;
 }
+
+/* =========================
+   SCANLINE OVERLAY
+========================= */
+
+body::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 229, 255, 0.015) 2px,
+      rgba(0, 229, 255, 0.015) 4px
+    );
+
+  pointer-events: none;
+
+  z-index: 9999;
+}
+
+/* =========================
+   ROOT APP
+========================= */
 
 #root {
   display: flex;
   flex-direction: column;
 }
+
+/* =========================
+   TYPOGRAPHY
+========================= */
 
 h1,
 h2,
@@ -66,15 +126,210 @@ h4,
 h5,
 h6 {
   margin: 0;
+
+  font-family: var(--font-display);
+  color: var(--text);
+
+  letter-spacing: 0.03em;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 800;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 p {
   margin: 0;
+  line-height: 1.7;
 }
 
-button,
+/* =========================
+   LINKS
+========================= */
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+
+  transition:
+    color var(--transition-fast),
+    text-shadow var(--transition-fast);
+}
+
+a:hover {
+  color: #5ef2ff;
+  text-shadow: var(--glow);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+button {
+  font: inherit;
+  border: none;
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* =========================
+   FORMS
+========================= */
+
 input,
 textarea,
 select {
+  width: 100%;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  background: var(--surface2);
+
+  color: var(--text);
+
+  padding: 0.9rem 1rem;
+
   font: inherit;
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 0 18px rgba(0, 229, 255, 0.15);
+
+  background: rgba(0, 229, 255, 0.03);
+
+  outline: none;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* =========================
+   UTILITIES
+========================= */
+
+.glow-text {
+  color: var(--accent);
+  text-shadow: var(--glow);
+}
+
+.panel {
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow);
+}
+
+.panel-secondary {
+  background: var(--surface2);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  padding: 0.35rem 0.8rem;
+
+  border-radius: 999px;
+
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.badge-live {
+  color: var(--accent3);
+
+  border: 1px solid rgba(57, 255, 20, 0.45);
+
+  background:
+    rgba(57, 255, 20, 0.08);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  margin-bottom: 1rem;
+
+  color: var(--text-muted);
+
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.section-title::before {
+  content: "";
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--accent);
+
+  box-shadow:
+    0 0 10px var(--accent);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  body {
+    font-size: 14px;
+  }
 }

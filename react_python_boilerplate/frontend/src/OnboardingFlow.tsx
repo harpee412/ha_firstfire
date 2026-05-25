@@ -1,6 +1,6 @@
 /**
  * FirstFire Onboarding Flow Component
- * Manages the multi-step onboarding process
+ * Cyberpunk smart-home onboarding shell
  */
 
 import { useEffect, useState } from "react"
@@ -40,7 +40,7 @@ export default function OnboardingFlow({
   const [error, setError] =
     useState<string | null>(null)
 
-  // Check if token is already configured
+  // Check if token already exists
   useEffect(() => {
     const checkConfig = async () => {
       try {
@@ -59,7 +59,6 @@ export default function OnboardingFlow({
         )
       }
 
-      // Fallback to localStorage
       const savedToken = Storage.getToken()
 
       if (savedToken) {
@@ -135,45 +134,26 @@ export default function OnboardingFlow({
     setError(null)
   }
 
-  return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        background:
-          "radial-gradient(circle at top, #0f172a 0%, #020617 70%)",
-        display: "flex",
-        flexDirection: "column",
-        overflowX: "hidden",
-        boxSizing: "border-box",
-        fontFamily:
-          "Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          boxSizing: "border-box",
-        }}
-      >
-        {step === "welcome" && (
+  const renderCurrentStep = () => {
+    switch (step) {
+      case "welcome":
+        return (
           <WelcomeScreen
             onStart={handleWelcomeStart}
           />
-        )}
+        )
 
-        {step === "setup" && (
+      case "setup":
+        return (
           <TokenSetupScreen
             onTokenSaved={handleTokenSaved}
             isLoading={isLoading}
             error={error}
           />
-        )}
+        )
 
-        {step === "confirmation" && (
+      case "confirmation":
+        return (
           <ConfirmationScreen
             configStatus={configStatus}
             onContinue={
@@ -181,12 +161,151 @@ export default function OnboardingFlow({
             }
             onBack={handleBackToSetup}
           />
-        )}
+        )
 
-        {step === "chat" && (
-          <ChatInterface />
-        )}
-      </div>
+      case "chat":
+        return <ChatInterface />
+
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        background: "#0a0c10",
+        color: "#e8eaf6",
+        display: "flex",
+        flexDirection: "column",
+        overflowX: "hidden",
+        position: "relative",
+        fontFamily:
+          '"Space Mono", monospace',
+      }}
+    >
+      {/* Scanline Overlay */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 1,
+          background:
+            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.015) 2px, rgba(0,229,255,0.015) 4px)",
+        }}
+      />
+
+      {/* App Header */}
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: "1.5rem",
+          padding: "1.5rem 2rem",
+          borderBottom:
+            "1px solid rgba(0,229,255,0.1)",
+          background: "rgba(10,12,16,0.92)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        {/* Logo */}
+        <div
+          style={{
+            width: "48px",
+            height: "48px",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background:
+              "linear-gradient(135deg, #00e5ff 0%, #0077ff 100%)",
+            boxShadow:
+              "0 0 20px rgba(0,229,255,0.35)",
+            flexShrink: 0,
+            fontSize: "1.4rem",
+          }}
+        >
+          🔥
+        </div>
+
+        {/* Header Text */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "1.2rem",
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              color: "#00e5ff",
+              fontFamily:
+                '"Syne", sans-serif',
+              textShadow:
+                "0 0 20px rgba(0,229,255,0.4)",
+            }}
+          >
+            FirstFire
+          </h1>
+
+          <p
+            style={{
+              margin: 0,
+              marginTop: "0.15rem",
+              fontSize: "0.65rem",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "#5c6394",
+            }}
+          >
+            AI Home Assistant System
+          </p>
+        </div>
+
+        {/* Status Badge */}
+        <div
+          style={{
+            marginLeft: "auto",
+            padding: "0.35rem 0.8rem",
+            borderRadius: "4px",
+            border:
+              "1px solid rgba(57,255,20,0.5)",
+            background:
+              "rgba(57,255,20,0.08)",
+            color: "#39ff14",
+            fontSize: "0.6rem",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            fontWeight: 700,
+          }}
+        >
+          ● Online
+        </div>
+      </header>
+
+      {/* Main Application Area */}
+      <main
+        style={{
+          width: "100%",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        {renderCurrentStep()}
+      </main>
     </div>
   )
 }

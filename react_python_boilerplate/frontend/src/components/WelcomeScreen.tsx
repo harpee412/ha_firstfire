@@ -1,304 +1,266 @@
 /**
  * FirstFire Welcome Screen Component
- * Full-width responsive onboarding landing page
+ * Cyberpunk smart-home onboarding experience
  */
 
 interface WelcomeScreenProps {
   onStart: () => void
 }
 
+const FEATURES = [
+  {
+    emoji: "🤖",
+    title: "AI Guidance",
+    description:
+      "Conversational onboarding powered by intelligent automation flows.",
+    tag: "SMART",
+  },
+  {
+    emoji: "⚡",
+    title: "Automation Engine",
+    description:
+      "Build advanced Home Assistant routines without YAML pain.",
+    tag: "LIVE",
+  },
+  {
+    emoji: "🏠",
+    title: "Home Intelligence",
+    description:
+      "Monitor, control, and optimize your smart home ecosystem.",
+    tag: "REALTIME",
+  },
+  {
+    emoji: "🔐",
+    title: "Secure Token Setup",
+    description:
+      "Direct OpenAI integration with encrypted local configuration.",
+    tag: "SECURE",
+  },
+]
+
 export default function WelcomeScreen({
   onStart,
 }: WelcomeScreenProps) {
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #2d1810 0%, #1a0f0a 50%, #0f0606 100%)",
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: "'Segoe UI', system-ui, sans-serif",
-        overflowX: "hidden",
-        position: "relative",
-        boxSizing: "border-box",
-      }}
-    >
-      {/* Background texture */}
-      <div
+    <div className="page-container">
+      {/* HERO */}
+      <section
+        className="cyber-panel"
         style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `
-            repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 2px,
-              rgba(139, 90, 43, 0.03) 2px,
-              rgba(139, 90, 43, 0.03) 4px
-            ),
-            repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 2px,
-              rgba(139, 90, 43, 0.03) 2px,
-              rgba(139, 90, 43, 0.03) 4px
-            )
-          `,
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Main Shell */}
-      <div
-        style={{
-          width: "100%",
-          minHeight: "100vh",
+          minHeight: "calc(100vh - 140px)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          gap: "2rem",
           position: "relative",
-          zIndex: 1,
-          boxSizing: "border-box",
-          padding: "1.5rem",
-          border: "3px solid #8b5a2b",
-          background:
-            "linear-gradient(135deg, rgba(61, 34, 20, 0.95) 0%, rgba(45, 24, 16, 0.95) 100%)",
-          boxShadow:
-            "0 0 60px rgba(0,0,0,0.8), inset 0 0 60px rgba(139, 90, 43, 0.1)",
+          overflow: "hidden",
         }}
       >
-        {/* Rune Header */}
+        {/* Ambient Glow */}
         <div
           style={{
-            textAlign: "center",
-            marginBottom: "2rem",
-            color: "#c19a6b",
-            fontSize: "1.2rem",
-            letterSpacing: "0.3em",
-            opacity: 0.7,
+            position: "absolute",
+            top: "-200px",
+            right: "-200px",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(0,229,255,0.18) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-250px",
+            left: "-250px",
+            width: "600px",
+            height: "600px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(255,61,113,0.12) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Status Row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            flexWrap: "wrap",
           }}
         >
-          ᚠ ᚢ ᚦ ᚨ ᚱ
+          <div className="section-title">
+            Smart Home Intelligence Platform
+          </div>
+
+          <div className="status-badge status-online">
+            ● SYSTEM READY
+          </div>
         </div>
 
-        {/* Hero */}
+        {/* Main Hero */}
         <div
           style={{
-            width: "100%",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
+            gap: "1.5rem",
+            maxWidth: "1200px",
+            position: "relative",
+            zIndex: 2,
           }}
         >
           <h1
             style={{
-              margin: 0,
-              fontSize: "clamp(4rem, 10vw, 8rem)",
-              lineHeight: 1,
-              color: "#d4af37",
-              fontWeight: 900,
-              textShadow:
-                "2px 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(212,175,55,0.3)",
-              wordBreak: "break-word",
+              fontSize: "clamp(4rem, 12vw, 8rem)",
+              lineHeight: 0.92,
+              fontWeight: 800,
+              letterSpacing: "-0.04em",
             }}
           >
-            FirstFire 🔥
+            <span className="glow-text">
+              FirstFire
+            </span>
+
+            <br />
+
+            <span
+              style={{
+                color: "var(--text)",
+              }}
+            >
+              AI Home Control
+            </span>
           </h1>
 
-          <h2
-            style={{
-              marginTop: "1rem",
-              marginBottom: "2rem",
-              fontSize: "clamp(1.5rem, 4vw, 3rem)",
-              color: "#c19a6b",
-              fontWeight: 600,
-              textShadow:
-                "1px 1px 2px rgba(0,0,0,0.6)",
-            }}
-          >
-            Kindle Your Home Assistant Journey
-          </h2>
-
           <p
             style={{
-              width: "100%",
-              color: "#d9ccc3",
-              fontSize: "1.2rem",
-              lineHeight: 1.8,
-              marginBottom: "1.5rem",
+              fontSize: "1.05rem",
+              lineHeight: 1.9,
+              color: "var(--text-muted)",
+              maxWidth: "900px",
             }}
           >
-            Ignite the flame of automation. FirstFire
-            guides you through the ancient art of Home
-            Assistant mastery.
-          </p>
-
-          <p
-            style={{
-              width: "100%",
-              color: "#d9ccc3",
-              fontSize: "1.2rem",
-              lineHeight: 1.8,
-              marginBottom: "3rem",
-            }}
-          >
-            Awaken the AI spirit with an OpenAI token.
-            Simple. Powerful. Free (pay only for what
-            you burn).
+            Transform your Home Assistant setup
+            into an intelligent automation system.
+            Configure OpenAI-powered workflows,
+            smart routines, device orchestration,
+            and conversational home intelligence —
+            all from a modern cyberpunk command
+            center.
           </p>
         </div>
 
         {/* Feature Grid */}
         <div
+          className="auto-grid"
           style={{
-            width: "100%",
-            background: "rgba(45, 24, 16, 0.6)",
-            border: "2px solid #8b5a2b",
-            borderRadius: "10px",
-            padding: "2rem",
-            marginBottom: "3rem",
-            boxSizing: "border-box",
+            position: "relative",
+            zIndex: 2,
           }}
         >
-          <p
-            style={{
-              margin: "0 0 2rem 0",
-              color: "#d4af37",
-              fontWeight: 700,
-              fontSize: "1.8rem",
-              textAlign: "center",
-            }}
-          >
-            What the flame reveals:
-          </p>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "2rem",
-              width: "100%",
-            }}
-          >
-            {[
-              {
-                title: "🤖 AI Guidance",
-                desc: "Setup wisdom from the spirits",
-              },
-              {
-                title: "💡 Smart Paths",
-                desc: "Configuration enlightenment",
-              },
-              {
-                title: "🎯 Quest Guide",
-                desc: "Step-by-step integration",
-              },
-              {
-                title: "❓ Oracle Answers",
-                desc: "Instant mystical knowledge",
-              },
-            ].map((feature) => (
+          {FEATURES.map((feature) => (
+            <div
+              key={feature.title}
+              className="cyber-card"
+            >
               <div
-                key={feature.title}
                 style={{
-                  color: "#d9ccc3",
-                  lineHeight: 1.8,
-                  textAlign: "center",
-                  padding: "1rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent:
+                    "space-between",
+                  marginBottom: "1rem",
                 }}
               >
                 <div
                   style={{
-                    fontSize: "1.2rem",
-                    fontWeight: 700,
-                    marginBottom: "0.5rem",
+                    fontSize: "2rem",
                   }}
                 >
-                  {feature.title}
+                  {feature.emoji}
                 </div>
 
-                <div
-                  style={{
-                    fontSize: "1rem",
-                    opacity: 0.8,
-                  }}
-                >
-                  {feature.desc}
+                <div className="badge badge-live">
+                  {feature.tag}
                 </div>
               </div>
-            ))}
+
+              <div className="cyber-card-title">
+                {feature.title}
+              </div>
+
+              <div className="cyber-card-text">
+                {feature.description}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Terminal Block */}
+        <div
+          className="terminal-block"
+          style={{
+            marginTop: "1rem",
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <div className="terminal-text">
+            &gt; Initializing AI automation
+            environment...
+            <br />
+            &gt; Connecting Home Assistant
+            services...
+            <br />
+            &gt; Preparing onboarding
+            sequence...
+            <br />
+            <span
+              style={{
+                color: "var(--accent)",
+              }}
+            >
+              &gt; SYSTEM READY
+            </span>
           </div>
         </div>
 
         {/* CTA */}
-        <button
-          onClick={onStart}
-          style={{
-            width: "100%",
-            padding: "1.5rem 2rem",
-            background:
-              "linear-gradient(135deg, #c84a1a 0%, #8b3a0a 100%)",
-            color: "#ffd700",
-            border: "2px solid #d4af37",
-            borderRadius: "6px",
-            fontSize: "1.3rem",
-            fontWeight: 800,
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            boxShadow:
-              "0 8px 20px rgba(200,74,26,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-            textShadow:
-              "1px 1px 2px rgba(0,0,0,0.5)",
-            letterSpacing: "0.05em",
-          }}
-        >
-          IGNITE THE FLAME ⚔️
-        </button>
-
-        {/* Footer */}
-        <p
-          style={{
-            marginTop: "2rem",
-            color: "#a89678",
-            fontSize: "1rem",
-            textAlign: "center",
-            fontStyle: "italic",
-          }}
-        >
-          The token is but one step. Fear not,
-          brave pioneer.
-        </p>
-
-        {/* Rune Footer */}
         <div
           style={{
-            textAlign: "center",
-            marginTop: "3rem",
-            color: "#c19a6b",
-            fontSize: "1.2rem",
-            letterSpacing: "0.3em",
-            opacity: 0.7,
+            display: "flex",
+            gap: "1rem",
+            flexWrap: "wrap",
+            marginTop: "1rem",
+            position: "relative",
+            zIndex: 2,
           }}
         >
-          ᚠ ᚢ ᚦ ᚨ ᚱ
+          <button
+            onClick={onStart}
+            className="cyber-button cyber-button-primary"
+            style={{
+              maxWidth: "340px",
+            }}
+          >
+            ⚡ Launch Onboarding
+          </button>
+
+          <button
+            className="cyber-button cyber-button-secondary"
+            style={{
+              maxWidth: "260px",
+            }}
+          >
+            📡 View Capabilities
+          </button>
         </div>
-      </div>
-
-      <style>{`
-        @keyframes flicker {
-          0%, 100% {
-            opacity: 1;
-          }
-
-          50% {
-            opacity: 0.8;
-          }
-        }
-      `}</style>
+      </section>
     </div>
   )
 }
