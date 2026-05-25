@@ -297,6 +297,60 @@ export default function InfluxDBSettings() {
                 </p>
               </div>
 
+              {/* InfluxDB Version Toggle */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <input
+                  type="checkbox"
+                  id="useV1"
+                  checked={isV1}
+                  onChange={(e) => {
+                    setIsV1(e.target.checked)
+                    setFormData((prev) => ({ ...prev, use_v1: e.target.checked }))
+                  }}
+                  style={{ cursor: "pointer" }}
+                />
+                <label htmlFor="useV1" style={{ cursor: "pointer", color: CSS_VARS.text, fontSize: "0.85rem" }}>
+                  InfluxDB 1.x (username/password) instead of 2.x (token)
+                </label>
+              </div>
+
+              {/* Username field - only for v1 */}
+              {isV1 && (
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "0.8rem",
+                      color: CSS_VARS.accent,
+                      marginBottom: "0.4rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={(formData as any).username || ""}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
+                    placeholder="homeassistant"
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem",
+                      background: CSS_VARS.surface2,
+                      border: `1px solid ${CSS_VARS.border}`,
+                      borderRadius: "6px",
+                      color: CSS_VARS.text,
+                      fontSize: "0.85rem",
+                      fontFamily: '"Noto Sans Mono", monospace',
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+              )}
+
               <div>
                 <label
                   style={{
@@ -309,14 +363,14 @@ export default function InfluxDBSettings() {
                     textTransform: "uppercase",
                   }}
                 >
-                  API Token
+                  {isV1 ? "Password" : "API Token"}
                 </label>
                 <input
                   type="password"
                   name="token"
                   value={formData.token}
                   onChange={handleInputChange}
-                  placeholder="Your InfluxDB API token"
+                  placeholder={isV1 ? "Your InfluxDB password" : "Your InfluxDB API token"}
                   style={{
                     width: "100%",
                     padding: "0.75rem",
@@ -336,11 +390,11 @@ export default function InfluxDBSettings() {
                     margin: "0.3rem 0 0 0",
                   }}
                 >
-                  Find in InfluxDB: Data → Tokens
+                  {isV1 ? "Set in InfluxDB Admin → Users" : "Find in InfluxDB: Data → Tokens"}
                 </p>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: isV1 ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
                 <div>
                   <label
                     style={{
@@ -353,7 +407,7 @@ export default function InfluxDBSettings() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Organization
+                    {isV1 ? "Database" : "Organization"}
                   </label>
                   <input
                     type="text"
@@ -374,6 +428,7 @@ export default function InfluxDBSettings() {
                   />
                 </div>
 
+                {!isV1 && (
                 <div>
                   <label
                     style={{
@@ -406,6 +461,7 @@ export default function InfluxDBSettings() {
                     }}
                   />
                 </div>
+                )}
               </div>
 
               <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
