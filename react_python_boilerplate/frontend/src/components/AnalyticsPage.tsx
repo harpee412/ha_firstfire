@@ -337,7 +337,7 @@ export default function AnalyticsPage() {
               <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: CSS_VARS.text }}>
                 Recent Changes
               </h3>
-              <div style={{ fontSize: "0.8rem", color: CSS_VARS.muted" }}>
+              <div style={{ fontSize: "0.8rem", color: CSS_VARS.muted }}>
                 {data.patterns.recent_changes.slice(0, 5).map((change: any, idx: number) => (
                   <div key={idx} style={{ padding: "0.5rem 0" }}>
                     {change.from} → {change.to} at {new Date(change.timestamp).toLocaleString()}
