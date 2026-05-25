@@ -446,3 +446,120 @@ async def test_influxdb_connection() -> ChatResponse:
                 "message": f"Test error: {str(e)}"
             }
         )
+
+
+# ============================================================================
+# Analytics Routes
+# ============================================================================
+
+@router.get("/analytics/entities", response_model=ChatResponse)
+async def get_analytics_entities() -> ChatResponse:
+    """Get list of available entities for analytics"""
+    try:
+        # In a real implementation, this would query InfluxDB for available measurements
+        # For now, return common Home Assistant entity types
+        entities = [
+            "light.living_room",
+            "light.bedroom",
+            "switch.kitchen",
+            "climate.main",
+            "sensor.temperature",
+            "sensor.humidity",
+            "sensor.energy",
+        ]
+        return ChatResponse(
+            success=True,
+            data={"entities": entities}
+        )
+    except Exception as e:
+        return ChatResponse(
+            success=False,
+            error={
+                "code": "ERROR",
+                "message": str(e)
+            }
+        )
+
+
+@router.get("/analytics/history/{entity_id}", response_model=ChatResponse)
+async def get_entity_history(entity_id: str, hours: int = 24) -> ChatResponse:
+    """Get historical data for an entity"""
+    try:
+        influxdb = get_influxdb_client()
+
+        if not influxdb or not influxdb.is_connected():
+            return ChatResponse(
+                success=False,
+                error={
+                    "code": "NOT_CONFIGURED",
+                    "message": "InfluxDB is not connected"
+                }
+            )
+
+        result = await influxdb.query_entity_history(entity_id, hours=hours)
+        return ChatResponse(success=result.get("success", False), data=result)
+
+    except Exception as e:
+        return ChatResponse(
+            success=False,
+            error={
+                "code": "ERROR",
+                "message": f"Query error: {str(e)}"
+            }
+        )
+
+
+@router.get("/analytics/stats/{entity_id}", response_model=ChatResponse)
+async def get_entity_stats(entity_id: str, hours: int = 24) -> ChatResponse:
+    """Get statistics for an entity"""
+    try:
+        influxdb = get_influxdb_client()
+
+        if not influxdb or not influxdb.is_connected():
+            return ChatResponse(
+                success=False,
+                error={
+                    "code": "NOT_CONFIGURED",
+                    "message": "InfluxDB is not connected"
+                }
+            )
+
+        result = await influxdb.get_entity_stats(entity_id, hours=hours)
+        return ChatResponse(success=result.get("success", False), data=result)
+
+    except Exception as e:
+        return ChatResponse(
+            success=False,
+            error={
+                "code": "ERROR",
+                "message": f"Stats error: {str(e)}"
+            }
+        )
+
+
+@router.get("/analytics/patterns/{entity_id}", response_model=ChatResponse)
+async def get_entity_patterns(entity_id: str, hours: int = 168) -> ChatResponse:
+    """Get usage patterns for an entity"""
+    try:
+        influxdb = get_influxdb_client()
+
+        if not influxdb or not influxdb.is_connected():
+            return ChatResponse(
+                success=False,
+                error={
+                    "code": "NOT_CONFIGURED",
+                    "message": "InfluxDB is not connected"
+                }
+            )
+
+        result = await influxdb.detect_patterns(entity_id, hours=hours)
+        return ChatResponse(success=result.get("success", False), data=result)
+
+    except Exception as e:
+        return ChatResponse(
+            success=False,
+            error={
+                "code": "ERROR",
+                "message": f"Pattern error: {str(e)}"
+            }
+        )

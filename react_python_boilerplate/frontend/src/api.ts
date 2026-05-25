@@ -253,6 +253,49 @@ export async function testInfluxDBConnection(): Promise<ApiResponse<any>> {
 }
 
 /**
+ * Get available entities for analytics
+ */
+export async function getAnalyticsEntities(): Promise<ApiResponse<any>> {
+  return apiCall("/analytics/entities")
+}
+
+/**
+ * Get historical data for an entity
+ */
+export async function getEntityHistory(
+  entityId: string,
+  hours: number = 24
+): Promise<ApiResponse<any>> {
+  return apiCall(`/analytics/history/${entityId}`, {
+    method: "GET",
+  })
+}
+
+/**
+ * Get statistics for an entity
+ */
+export async function getEntityStats(
+  entityId: string,
+  hours: number = 24
+): Promise<ApiResponse<any>> {
+  return apiCall(`/analytics/stats/${entityId}`, {
+    method: "GET",
+  })
+}
+
+/**
+ * Get usage patterns for an entity
+ */
+export async function getEntityPatterns(
+  entityId: string,
+  hours: number = 168
+): Promise<ApiResponse<any>> {
+  return apiCall(`/analytics/patterns/${entityId}`, {
+    method: "GET",
+  })
+}
+
+/**
  * Storage utilities for localStorage management
  */
 export const Storage = {
