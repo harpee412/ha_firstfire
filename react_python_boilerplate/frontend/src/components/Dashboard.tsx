@@ -30,8 +30,14 @@ interface SystemStatus {
   automations: number
 }
 
+interface InfluxDBStatus {
+  configured: boolean
+  connected: boolean
+}
+
 export default function Dashboard({ onNavigateToChat }: DashboardProps) {
   const [status, setStatus] = useState<SystemStatus | null>(null)
+  const [influxdb, setInfluxdb] = useState<InfluxDBStatus | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -52,6 +58,16 @@ export default function Dashboard({ onNavigateToChat }: DashboardProps) {
             automations: 24,
           })
         }
+
+        // Fetch InfluxDB status
+        const influxResponse = await fetch("/api/influxdb/status")
+        const influxData = await influxResponse.json()
+        if (influxData.success && influxData.data) {
+          setInfluxdb({
+            configured: influxData.data.configured,
+            connected: influxData.data.connected,
+          })
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to fetch status"
         setError(message)
@@ -70,9 +86,16 @@ export default function Dashboard({ onNavigateToChat }: DashboardProps) {
     { label: "Garage On", command: "turn on garage lights", icon: "🚗" },
   ]
 
-  const handleQuickAction = (command: string) => {
-    // TODO: Execute command and show result
-    console.log("Quick action:", command)
+  const handleQuickAction = async (command: string) => {
+    try {
+      const response = await sendChat(command, null)
+      if (response.success && response.data) {
+        // Could show a toast/notification here
+        console.log("Quick action result:", response.data.response)
+      }
+    } catch (err) {
+      console.error("Quick action failed:", err)
+    }
   }
 
   return (
@@ -184,6 +207,62 @@ export default function Dashboard({ onNavigateToChat }: DashboardProps) {
                 </span>
               </p>
             </>
+          )}
+        </div>
+
+        {/* InfluxDB Analytics Card */}
+        <div
+          style={{
+            padding: "1.5rem",
+            background: CSS_VARS.surface,
+            borderRadius: "8px",
+            border: `1px solid ${CSS_VARS.border}`,
+            boxShadow: "0 0 20px rgba(0,229,255,0.1)",
+          }}
+        >
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📊</div>
+          <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", color: CSS_VARS.accent }}>
+            Analytics
+          </h3>
+          {isLoading ? (
+            <p style={{ margin: 0, color: CSS_VARS.muted, fontSize: "0.85rem" }}>Loading...</p>
+          ) : influxdb ? (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <div
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    background: influxdb.connected ? CSS_VARS.accent3 : CSS_VARS.accent2,
+                  }}
+                />
+                <span style={{ fontSize: "0.75rem", color: CSS_VARS.muted }}>
+                  {influxdb.connected ? "Connected" : influxdb.configured ? "Configured" : "Not Connected"}
+                </span>
+              </div>
+              {!influxdb.connected && (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "0.75rem",
+                    color: CSS_VARS.muted,
+                    fontStyle: "italic",
+                  }}
+                >
+                  {influxdb.configured ? "Click settings to connect" : "Click settings to configure"}
+                </p>
+              )}
+            </>
+          ) : (
+            <p style={{ margin: 0, color: CSS_VARS.muted, fontSize: "0.85rem" }}>Not available</p>
           )}
         </div>
       </div>

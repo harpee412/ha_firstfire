@@ -3,10 +3,25 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
 from .config import get_config_manager
+from .influxdb_client import init_influxdb
 from .api.routes import router as api_router
 
 # Initialize configuration
 config_manager = get_config_manager()
+
+# Initialize InfluxDB if configured
+config = config_manager.get_config()
+if config.is_influxdb_configured():
+    try:
+        init_influxdb(
+            url=config.influxdb_url,
+            token=config.influxdb_token,
+            org=config.influxdb_org,
+            bucket=config.influxdb_bucket,
+        )
+        print(f"✓ InfluxDB connected: {config.influxdb_url}")
+    except Exception as e:
+        print(f"⚠ InfluxDB connection failed: {e}")
 
 app = FastAPI(
     title="FirstFire",

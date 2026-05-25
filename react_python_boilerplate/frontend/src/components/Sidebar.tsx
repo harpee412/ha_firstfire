@@ -4,8 +4,8 @@
  */
 
 interface SidebarProps {
-  currentPage: "dashboard" | "chat"
-  onNavigate: (page: "dashboard" | "chat") => void
+  currentPage: "dashboard" | "chat" | "settings"
+  onNavigate: (page: "dashboard" | "chat" | "settings") => void
   onSettings: () => void
   onLogout: () => void
 }
@@ -172,13 +172,13 @@ export default function Sidebar({
         }}
       >
         <button
-          onClick={onSettings}
+          onClick={() => onNavigate("settings")}
           style={{
             padding: "0.65rem 1rem",
-            background: "transparent",
-            border: `1px solid ${CSS_VARS.border}`,
+            background: currentPage === "settings" ? `rgba(0,229,255,0.1)` : "transparent",
+            border: currentPage === "settings" ? `1px solid ${CSS_VARS.accent}` : `1px solid ${CSS_VARS.border}`,
             borderRadius: "6px",
-            color: CSS_VARS.muted,
+            color: currentPage === "settings" ? CSS_VARS.accent : CSS_VARS.muted,
             cursor: "pointer",
             fontSize: "0.7rem",
             letterSpacing: "0.05em",
@@ -190,12 +190,16 @@ export default function Sidebar({
             justifyContent: "center",
           }}
           onMouseEnter={(e) => {
-            ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent
-            ;(e.target as HTMLButtonElement).style.color = CSS_VARS.accent
+            if (currentPage !== "settings") {
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.accent
+            }
           }}
           onMouseLeave={(e) => {
-            ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.border
-            ;(e.target as HTMLButtonElement).style.color = CSS_VARS.muted
+            if (currentPage !== "settings") {
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.border
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.muted
+            }
           }}
         >
           ⚙️ Settings

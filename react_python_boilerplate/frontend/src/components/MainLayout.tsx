@@ -7,6 +7,7 @@ import { useState } from "react"
 import Sidebar from "./Sidebar"
 import Dashboard from "./Dashboard"
 import ChatInterface from "./ChatInterface"
+import InfluxDBSettings from "./InfluxDBSettings"
 import { Storage } from "../api"
 
 const CSS_VARS = {
@@ -15,7 +16,7 @@ const CSS_VARS = {
 }
 
 export default function MainLayout() {
-  const [currentPage, setCurrentPage] = useState<"dashboard" | "chat">(
+  const [currentPage, setCurrentPage] = useState<"dashboard" | "chat" | "settings">(
     "dashboard"
   )
 
@@ -80,6 +81,10 @@ export default function MainLayout() {
       >
         {currentPage === "dashboard" ? (
           <Dashboard onNavigateToChat={() => setCurrentPage("chat")} />
+        ) : currentPage === "settings" ? (
+          <div style={{ overflowY: "auto", height: "100%" }}>
+            <InfluxDBSettings />
+          </div>
         ) : (
           <ChatInterface
             onBackToDashboard={() => setCurrentPage("dashboard")}
