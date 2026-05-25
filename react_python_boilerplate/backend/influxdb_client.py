@@ -92,7 +92,25 @@ class InfluxDBConnector:
     def _test_connection(self) -> bool:
         """Test if connection is working"""
         try:
-            if self.client:
+            if not self.client:
+                return False
+
+            if self.is_v1:
+                # For InfluxDB 1.x, try to ping or query databases
+                try:
+                    self.client.ping()
+                    return True
+                except AttributeError:
+                    # If ping() doesn't exist, try to get server info
+                    try:
+                        self.client.request('GET', 'ping')
+                        return True
+                    except:
+                        # Last resort: try to list databases
+                        self.client.get_list_database()
+                        return True
+            else:
+                # For InfluxDB 2.x, use ready()
                 self.client.ready()
                 return True
         except Exception as e:
