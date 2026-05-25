@@ -46,12 +46,13 @@ class AgentRouter:
             "trigger": self.automation_agent,
         }
 
-    async def route(self, user_message: str) -> Dict[str, Any]:
+    async def route(self, user_message: str, history: list = None) -> Dict[str, Any]:
         """
         Route user message to appropriate agent
 
         Args:
             user_message: User's query
+            history: Conversation history for context
 
         Returns:
             Agent response
@@ -59,8 +60,8 @@ class AgentRouter:
         # Parse message to find domain
         agent = self._select_agent(user_message)
 
-        # Delegate to agent
-        response = await agent.process_message(user_message)
+        # Delegate to agent with history
+        response = await agent.process_message(user_message, history=history or [])
 
         # Add routing info to metadata
         if "metadata" in response:

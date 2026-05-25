@@ -62,7 +62,7 @@ Key principles:
 - Highlight system status and configuration
 - Provide practical guidance"""
 
-    async def process_message(self, user_message: str) -> Dict[str, Any]:
+    async def process_message(self, user_message: str, history: list = None) -> Dict[str, Any]:
         """
         Process message with high-level system context
 
@@ -71,31 +71,40 @@ Key principles:
 
         Args:
             user_message: User's question about the system
+            history: Conversation history for context
 
         Returns:
             Dict with response, token count, and metadata
         """
         try:
+            history = history or []
+
             # Gather system context (counts only, no raw data)
             system_context = await self._gather_system_context()
 
-            # Initial message with minimal context
+            # Build messages with conversation history
             messages = [
                 {
                     "role": "system",
                     "content": self.system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": f"""System Context:
+                }
+            ]
+
+            # Add conversation history
+            if history:
+                messages.extend(history)
+
+            # Add current context and question
+            messages.append({
+                "role": "user",
+                "content": f"""System Context:
 {system_context}
 
 User Question: {user_message}
 
 Note: For specific domain questions (lights, switches, automations), the user's agent router
 will automatically route to specialized agents. But you can provide guidance here."""
-                }
-            ]
+            })
 
             # Call OpenAI WITHOUT tools - just direct response
             response = await self.client.chat.completions.create(

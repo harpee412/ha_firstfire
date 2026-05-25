@@ -1,6 +1,6 @@
 /**
  * FirstFire Welcome Screen Component
- * Cyberpunk smart-home onboarding experience
+ * Cyberpunk smart-home onboarding experience with Noto Font
  */
 
 interface WelcomeScreenProps {
@@ -42,7 +42,10 @@ export default function WelcomeScreen({
   onStart,
 }: WelcomeScreenProps) {
   return (
-    <div className="page-container">
+    <div className="page-container" style={{ fontFamily: '"Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&family=Noto+Sans+Mono:wght@400;600&display=swap');
+      `}</style>
       {/* HERO */}
       <section
         className="cyber-panel"

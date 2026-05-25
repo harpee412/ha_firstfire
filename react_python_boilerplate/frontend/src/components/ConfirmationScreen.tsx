@@ -1,6 +1,6 @@
 /**
  * FirstFire Confirmation Screen Component
- * Cyberpunk/Sci-Fi Design
+ * Cyberpunk/Sci-Fi Design with Noto Font
  */
 
 import { ConfigStatus } from "../types"
@@ -40,8 +40,12 @@ export default function ConfirmationScreen({
         padding: "2rem",
         overflow: "hidden",
         position: "relative",
+        fontFamily: '"Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&family=Noto+Sans+Mono:wght@400;600&display=swap');
+      `}</style>
       {/* Scanline overlay */}
       <div
         style={{
@@ -155,7 +159,7 @@ export default function ConfirmationScreen({
                     color: CSS_VARS.accent3,
                     fontSize: "1rem",
                     fontWeight: 600,
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'Noto Sans Mono', monospace",
                   }}
                 >
                   {configStatus.model}
@@ -206,7 +210,7 @@ export default function ConfirmationScreen({
                     color: CSS_VARS.accent2,
                     fontSize: "0.9rem",
                     fontWeight: 600,
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'Noto Sans Mono', monospace",
                     letterSpacing: "0.05em",
                   }}
                 >

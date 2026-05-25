@@ -82,17 +82,20 @@ The matching entities are already identified for you - just use them.
 Always respond in Markdown format for clarity. Be concise and focused on {self.domain_name}.
 When showing state or configuration, use code blocks and lists for readability."""
 
-    async def process_message(self, user_message: str) -> Dict[str, Any]:
+    async def process_message(self, user_message: str, history: list = None) -> Dict[str, Any]:
         """
         Process message with domain-specific context
 
         Args:
             user_message: User's question about this domain
+            history: Conversation history for context
 
         Returns:
             Dict with response, token count, and metadata
         """
         try:
+            history = history or []
+
             # Step 1: Parse intent (lightweight, no HA call yet)
             intent = self._parse_intent(user_message)
 
@@ -118,22 +121,28 @@ When showing state or configuration, use code blocks and lists for readability."
                             state = entity.get("state")
                             entity_matches += f"- **{name}** (`{entity_id}`) - State: {state}\n"
 
-            # Step 4: Call Claude with focused context
+            # Step 4: Build messages with conversation history
+            messages = [
+                {
+                    "role": "system",
+                    "content": self.system_prompt
+                }
+            ]
+
+            # Add conversation history
+            if history:
+                messages.extend(history)
+
+            # Add current context and question
             user_context = f"""Current {self.domain_name} Status:
 {domain_data}{entity_matches}
 
 User Question: {user_message}"""
 
-            messages = [
-                {
-                    "role": "system",
-                    "content": self.system_prompt
-                },
-                {
-                    "role": "user",
-                    "content": user_context
-                }
-            ]
+            messages.append({
+                "role": "user",
+                "content": user_context
+            })
 
             response = await self.client.chat.completions.create(
                 model=self.model,

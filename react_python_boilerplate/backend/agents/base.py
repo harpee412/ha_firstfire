@@ -32,12 +32,13 @@ class BaseAgent(ABC):
         pass
 
     @abstractmethod
-    async def process_message(self, user_message: str) -> Dict[str, Any]:
+    async def process_message(self, user_message: str, history: list = None) -> Dict[str, Any]:
         """
         Process user message and return response
 
         Args:
             user_message: User's question/request
+            history: Conversation history (list of {role, content} dicts)
 
         Returns:
             Dict with keys:

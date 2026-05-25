@@ -6,9 +6,10 @@ Handles configuration, validation, and agent-powered chat endpoints
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from ..config import get_config_manager, get_config, FirstFireConfig
 from ..agents.agent_router import AgentRouter
+from ..conversation import get_conversation_manager
 import openai
 
 router = APIRouter()
@@ -19,9 +20,9 @@ router = APIRouter()
 # ============================================================================
 
 class ChatRequest(BaseModel):
-    """Chat message request"""
+    """Chat message request with conversation support"""
     message: str = Field(..., min_length=1, max_length=2000)
-    conversation_id: Optional[str] = None
+    conversation_id: Optional[str] = None  # If None, creates new conversation
 
 
 class ChatResponse(BaseModel):
@@ -212,7 +213,7 @@ async def get_available_models() -> ChatResponse:
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     """
-    Send a message to FirstFire's multi-agent system
+    Send a message to FirstFire's multi-agent system with conversation history
 
     The router automatically selects the appropriate agent:
     - LightAgent for lighting questions
@@ -222,6 +223,9 @@ async def chat(request: ChatRequest) -> ChatResponse:
 
     All agents have direct Home Assistant API access and return
     markdown-formatted responses for readability.
+
+    Conversation history is maintained per conversation_id, allowing agents
+    to remember context across multiple turns.
     """
     try:
         config = get_config()
@@ -236,18 +240,36 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 }
             )
 
+        # Initialize or retrieve conversation
+        conv_manager = get_conversation_manager()
+        if not request.conversation_id:
+            conversation_id = conv_manager.create_conversation()
+        else:
+            conversation_id = request.conversation_id
+
+        # Get conversation history
+        history = conv_manager.get_history(conversation_id)
+
+        # Add user message to history
+        conv_manager.add_message(conversation_id, "user", request.message)
+
         # Route to appropriate agent based on message content
         router = AgentRouter()
-        result = await router.route(request.message)
+        result = await router.route(request.message, history=history)
+
+        # Add agent response to history
+        response_text = result.get("response", "")
+        conv_manager.add_message(conversation_id, "assistant", response_text)
 
         if result.get("success"):
             return ChatResponse(
                 success=True,
                 data={
-                    "response": result.get("response"),
+                    "response": response_text,
                     "tokens_used": result.get("tokens_used", 0),
                     "agent": result.get("metadata", {}).get("agent", "Unknown"),
                     "router_selected": result.get("metadata", {}).get("router_selected", "Unknown"),
+                    "conversation_id": conversation_id,
                 }
             )
         else:
