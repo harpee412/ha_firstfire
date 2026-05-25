@@ -37,16 +37,24 @@ You can take action on lights:
 - "Turn on the living room light" → Execute turn_on
 - "Dim bedroom to 50%" → Set brightness to ~128
 - "Turn off all lights" → Turn off each light mentioned
-- Always confirm what you're doing first if it's a control action
+
+CRITICAL - Always verify results:
+- I provide verification data after each control action (verification field)
+- If verification shows success=true, the light actually changed - report success
+- If verification shows success=false, report the ACTUAL state, not assumed success
+- Never claim success without verification data in your response
+- If a light doesn't respond/verify, be honest about the failure
 
 Always respond in Markdown format. When discussing:
 - Multiple lights: show as a list grouped by room or status
 - Specific light: show current state, brightness (0-255), color info
-- Control actions: confirm what you'll do, then report success/failure
+- Control actions: Confirm intent, execute, check verification, report ACTUAL results:
+  * Success: "✓ Turned off Basement Desk Left (verified off)"
+  * Failure: "✗ Failed to turn off Basement Desk Left - still on. Device may be unreachable."
 - Automations: suggest practical lighting scenarios (morning wake-up, evening dimming, away mode)
 - Technical details: use code blocks for state values and service calls
 
-Be friendly and practical. Focus on what lights are actually capable of."""
+Be friendly and honest. Never fake success - users can see the actual device state."""
 
     def _format_control(self, entities: List[Dict]) -> str:
         """Override to show light-specific details"""
@@ -113,7 +121,7 @@ Be friendly and practical. Focus on what lights are actually capable of."""
         return "\n".join(output)
 
     # =========================================================================
-    # Light Control Actions
+    # Light Control Actions (with verification)
     # =========================================================================
 
     async def turn_on(self, entity_id: str, brightness: int = None) -> Dict[str, Any]:
@@ -122,18 +130,68 @@ Be friendly and practical. Focus on what lights are actually capable of."""
         if brightness and brightness <= 100:
             brightness = int((brightness / 100) * 255)
 
-        return await self.ha_client.turn_on_light(entity_id, brightness=brightness)
+        result = await self.ha_client.turn_on_light(entity_id, brightness=brightness)
+
+        # Verify the action
+        await self._verify_state(entity_id, "on", result)
+        return result
 
     async def turn_off(self, entity_id: str) -> Dict[str, Any]:
         """Turn off a light"""
-        return await self.ha_client.turn_off_light(entity_id)
+        result = await self.ha_client.turn_off_light(entity_id)
+
+        # Verify the action
+        await self._verify_state(entity_id, "off", result)
+        return result
 
     async def toggle(self, entity_id: str) -> Dict[str, Any]:
         """Toggle a light on/off"""
-        return await self.ha_client.toggle_light(entity_id)
+        result = await self.ha_client.toggle_light(entity_id)
+
+        # Verify the action by checking new state
+        state_result = await self.ha_client.get_entity_state(entity_id)
+        if state_result.get("success"):
+            new_state = state_result.get("data", {}).get("state")
+            result["verification"] = {
+                "verified": True,
+                "new_state": new_state
+            }
+        return result
 
     async def set_brightness(self, entity_id: str, brightness: int) -> Dict[str, Any]:
         """Set brightness (accepts 0-100 percentage or 0-255 value)"""
         if brightness <= 100:
             brightness = int((brightness / 100) * 255)
-        return await self.ha_client.set_light_brightness(entity_id, brightness)
+
+        result = await self.ha_client.set_light_brightness(entity_id, brightness)
+
+        # Verify the action
+        state_result = await self.ha_client.get_entity_state(entity_id)
+        if state_result.get("success"):
+            actual_brightness = state_result.get("data", {}).get("attributes", {}).get("brightness")
+            result["verification"] = {
+                "verified": True,
+                "expected_brightness": brightness,
+                "actual_brightness": actual_brightness,
+                "success": actual_brightness == brightness
+            }
+        return result
+
+    async def _verify_state(self, entity_id: str, expected_state: str, result: Dict[str, Any]) -> None:
+        """Verify that a control action actually succeeded"""
+        state_result = await self.ha_client.get_entity_state(entity_id)
+        if state_result.get("success"):
+            actual_state = state_result.get("data", {}).get("state")
+            result["verification"] = {
+                "verified": True,
+                "expected_state": expected_state,
+                "actual_state": actual_state,
+                "success": actual_state == expected_state
+            }
+            if actual_state != expected_state:
+                result["warning"] = f"State mismatch: expected {expected_state}, got {actual_state}"
+        else:
+            result["verification"] = {
+                "verified": False,
+                "error": "Could not verify state after control action"
+            }
