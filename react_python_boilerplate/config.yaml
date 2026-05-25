@@ -1,5 +1,5 @@
 name: FirstFire
-version: "0.1.22"
+version: "0.1.23"
 slug: firstfire
 description: FirstFire - AI-Powered Home Assistant Onboarding with OpenAI
 startup: services
