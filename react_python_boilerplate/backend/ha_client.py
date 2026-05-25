@@ -1,6 +1,6 @@
 """
 Home Assistant API Client
-Direct integration with Home Assistant supervisor and API
+Direct integration with Home Assistant via supervisor API gateway
 """
 
 import os
@@ -29,42 +29,43 @@ class HomeAssistantClient:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 headers = {"Authorization": f"Bearer {self.supervisor_token}"}
                 response = await client.get(
-                    f"{self.ha_url}/api/states",
+                    f"{self.ha_url}/states",
                     headers=headers
                 )
                 if response.status_code == 200:
                     return {"success": True, "data": response.json()}
-                return {"success": False, "error": f"Status {response.status_code}"}
+                return {"success": False, "error": f"Status {response.status_code}: {response.text}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     async def get_automations(self) -> Dict[str, Any]:
-        """Fetch all automations from Home Assistant"""
+        """Fetch automations from Home Assistant (parsed from states)"""
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                headers = {"Authorization": f"Bearer {self.supervisor_token}"}
-                response = await client.get(
-                    f"{self.ha_url}/api/config/automation/config",
-                    headers=headers
-                )
-                if response.status_code == 200:
-                    return {"success": True, "data": response.json()}
-                return {"success": False, "error": f"Status {response.status_code}"}
+            # Automations are exposed as automation.* entities in /api/states
+            entities_result = await self.get_entities()
+            if entities_result.get("success"):
+                all_entities = entities_result.get("data", [])
+                automations = [e for e in all_entities if e.get("entity_id", "").startswith("automation.")]
+                return {"success": True, "data": automations}
+            return entities_result
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     async def get_integrations(self) -> Dict[str, Any]:
-        """Fetch installed integrations from Home Assistant"""
+        """Fetch installed integrations from Home Assistant config"""
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 headers = {"Authorization": f"Bearer {self.supervisor_token}"}
                 response = await client.get(
-                    f"{self.ha_url}/api/config/config_entries/config",
+                    f"{self.ha_url}/config",
                     headers=headers
                 )
                 if response.status_code == 200:
-                    return {"success": True, "data": response.json()}
-                return {"success": False, "error": f"Status {response.status_code}"}
+                    config = response.json()
+                    # Extract integrations from config components
+                    integrations = config.get("components", [])
+                    return {"success": True, "data": integrations}
+                return {"success": False, "error": f"Status {response.status_code}: {response.text}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -74,12 +75,12 @@ class HomeAssistantClient:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 headers = {"Authorization": f"Bearer {self.supervisor_token}"}
                 response = await client.get(
-                    f"{self.ha_url}/api/config",
+                    f"{self.ha_url}/config",
                     headers=headers
                 )
                 if response.status_code == 200:
                     return {"success": True, "data": response.json()}
-                return {"success": False, "error": f"Status {response.status_code}"}
+                return {"success": False, "error": f"Status {response.status_code}: {response.text}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -91,13 +92,13 @@ class HomeAssistantClient:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 headers = {"Authorization": f"Bearer {self.supervisor_token}"}
                 response = await client.post(
-                    f"{self.ha_url}/api/services/{domain}/{service}",
+                    f"{self.ha_url}/services/{domain}/{service}",
                     headers=headers,
                     json=service_data or {}
                 )
                 if response.status_code in [200, 201]:
                     return {"success": True, "data": response.json()}
-                return {"success": False, "error": f"Status {response.status_code}"}
+                return {"success": False, "error": f"Status {response.status_code}: {response.text}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -107,11 +108,11 @@ class HomeAssistantClient:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 headers = {"Authorization": f"Bearer {self.supervisor_token}"}
                 response = await client.get(
-                    f"{self.ha_url}/api/states/{entity_id}",
+                    f"{self.ha_url}/states/{entity_id}",
                     headers=headers
                 )
                 if response.status_code == 200:
                     return {"success": True, "data": response.json()}
-                return {"success": False, "error": f"Status {response.status_code}"}
+                return {"success": False, "error": f"Status {response.status_code}: {response.text}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
