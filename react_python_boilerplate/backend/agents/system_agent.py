@@ -72,6 +72,10 @@ Key principles:
             # Initial message with context
             messages = [
                 {
+                    "role": "system",
+                    "content": self.system_prompt
+                },
+                {
                     "role": "user",
                     "content": f"""System Context:
 {system_context}
@@ -84,7 +88,6 @@ User Question: {user_message}"""
             response = await self.client.chat.completions.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
-                system=self.system_prompt,
                 messages=messages,
                 tools=tools,
                 tool_choice="auto"
@@ -254,7 +257,6 @@ User Question: {user_message}"""
             final_response = await self.client.chat.completions.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
-                system=self.system_prompt,
                 messages=messages
             )
 
