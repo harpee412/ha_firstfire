@@ -175,7 +175,7 @@ export default function ChatInterface() {
               margin: "2px 0 0 0",
             }}
           >
-            Home Automation Oracle
+            Build your first fire
           </p>
         </div>
 
@@ -503,7 +503,7 @@ export default function ChatInterface() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask the oracle..."
+              placeholder="Start your first fire..."
               disabled={isLoading}
               style={{
                 flex: 1,

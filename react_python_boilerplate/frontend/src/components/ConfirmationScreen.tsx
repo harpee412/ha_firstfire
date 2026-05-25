@@ -1,9 +1,21 @@
 /**
  * FirstFire Confirmation Screen Component
- * Valheim-inspired design
+ * Cyberpunk/Sci-Fi Design
  */
 
 import { ConfigStatus } from "../types"
+
+const CSS_VARS = {
+  bg: "#0a0c10",
+  surface: "#111420",
+  surface2: "#181d2e",
+  border: "#1e2540",
+  accent: "#00e5ff",
+  accent2: "#ff3d71",
+  accent3: "#39ff14",
+  text: "#e8eaf6",
+  muted: "#5c6394",
+}
 
 interface ConfirmationScreenProps {
   configStatus: ConfigStatus | null
@@ -21,7 +33,7 @@ export default function ConfirmationScreen({
       style={{
         width: "100vw",
         height: "100vh",
-        background: "linear-gradient(135deg, #2d1810 0%, #1a0f0a 50%, #0f0606 100%)",
+        background: CSS_VARS.bg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -30,17 +42,18 @@ export default function ConfirmationScreen({
         position: "relative",
       }}
     >
+      {/* Scanline overlay */}
       <div
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `
-            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px),
-            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 90, 43, 0.03) 2px, rgba(139, 90, 43, 0.03) 4px)
-          `,
+          inset: 0,
+          backgroundImage: `repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0,229,255,0.015) 2px,
+            rgba(0,229,255,0.015) 4px
+          )`,
           pointerEvents: "none",
         }}
       />
@@ -49,71 +62,60 @@ export default function ConfirmationScreen({
         style={{
           width: "100%",
           maxWidth: "700px",
-          background: "linear-gradient(135deg, rgba(61, 34, 20, 0.95) 0%, rgba(45, 24, 16, 0.95) 100%)",
-          border: "3px solid #8b5a2b",
-          borderRadius: "8px",
-          padding: "3.5rem 3rem",
-          boxShadow: "0 0 60px rgba(0,0,0,0.8), inset 0 0 60px rgba(139, 90, 43, 0.1)",
+          background: CSS_VARS.surface,
+          border: `1px solid ${CSS_VARS.border}`,
+          borderRadius: "12px",
+          padding: "3rem",
+          boxShadow: `0 0 40px rgba(0,229,255,0.1)`,
           position: "relative",
           zIndex: 1,
           textAlign: "center",
         }}
       >
-        {/* Runic border top */}
-        <div
-          style={{
-            marginBottom: "2rem",
-            color: "#c19a6b",
-            fontSize: "1.1rem",
-            letterSpacing: "0.3em",
-            opacity: 0.7,
-          }}
-        >
-          ᚠ ᛁ ᚱ ᛖ 🔥
-        </div>
-
         {/* Success Icon */}
         <div
           style={{
-            fontSize: "5rem",
+            fontSize: "4rem",
             marginBottom: "1.5rem",
           }}
         >
-          ⚔️
+          🔥
         </div>
 
         {/* Title */}
         <h1
           style={{
-            margin: "0 0 1.5rem 0",
-            fontSize: "3rem",
+            margin: "0 0 1rem 0",
+            fontSize: "2.2rem",
             lineHeight: 1,
-            color: "#d4af37",
+            color: CSS_VARS.accent,
             fontWeight: 800,
-            textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
+            textShadow: `0 0 20px rgba(0,229,255,0.25)`,
+            letterSpacing: "0.05em",
           }}
         >
-          The Ritual Complete
+          Ready to Ignite
         </h1>
 
         <p
           style={{
-            color: "#d9ccc3",
-            fontSize: "1.1rem",
+            color: CSS_VARS.text,
+            fontSize: "1rem",
             lineHeight: 1.8,
             marginBottom: "2.5rem",
+            opacity: 0.9,
           }}
         >
-          The spirits are bound. Your oracle awaits. The path to mastery lies before you.
+          Your FirstFire is configured. Start automating your home with intelligence.
         </p>
 
         {/* Configuration Display */}
         {configStatus && (
           <div
             style={{
-              background: "rgba(45, 24, 16, 0.6)",
-              border: "2px solid #8b5a2b",
-              borderRadius: "6px",
+              background: CSS_VARS.surface2,
+              border: `1px solid ${CSS_VARS.border}`,
+              borderRadius: "8px",
               padding: "2rem",
               marginBottom: "2.5rem",
               textAlign: "left",
@@ -122,36 +124,38 @@ export default function ConfirmationScreen({
             <p
               style={{
                 margin: "0 0 1.5rem 0",
-                color: "#d4af37",
-                fontSize: "1rem",
+                color: CSS_VARS.accent,
+                fontSize: "0.7rem",
                 textTransform: "uppercase",
-                letterSpacing: "0.08em",
+                letterSpacing: "0.15em",
                 fontWeight: 700,
                 textAlign: "center",
               }}
             >
-              Your Covenant
+              Configuration Status
             </p>
 
-            <div style={{ display: "grid", gap: "1.25rem" }}>
+            <div style={{ display: "grid", gap: "1.5rem" }}>
               <div>
                 <p
                   style={{
                     margin: "0 0 0.4rem 0",
-                    color: "#c19a6b",
-                    fontSize: "0.9rem",
+                    color: CSS_VARS.muted,
+                    fontSize: "0.7rem",
                     textTransform: "uppercase",
                     fontWeight: 600,
+                    letterSpacing: "0.1em",
                   }}
                 >
-                  Oracle Spirit
+                  AI Model
                 </p>
                 <p
                   style={{
                     margin: 0,
-                    color: "#ffd700",
-                    fontSize: "1.1rem",
+                    color: CSS_VARS.accent3,
+                    fontSize: "1rem",
                     fontWeight: 600,
+                    fontFamily: "'Space Mono', monospace",
                   }}
                 >
                   {configStatus.model}
@@ -162,19 +166,20 @@ export default function ConfirmationScreen({
                 <p
                   style={{
                     margin: "0 0 0.4rem 0",
-                    color: "#c19a6b",
-                    fontSize: "0.9rem",
+                    color: CSS_VARS.muted,
+                    fontSize: "0.7rem",
                     textTransform: "uppercase",
                     fontWeight: 600,
+                    letterSpacing: "0.1em",
                   }}
                 >
-                  Response Breath
+                  Response Length
                 </p>
                 <p
                   style={{
                     margin: 0,
-                    color: "#ffd700",
-                    fontSize: "1.1rem",
+                    color: CSS_VARS.accent,
+                    fontSize: "1rem",
                     fontWeight: 600,
                   }}
                 >
@@ -186,21 +191,23 @@ export default function ConfirmationScreen({
                 <p
                   style={{
                     margin: "0 0 0.4rem 0",
-                    color: "#c19a6b",
-                    fontSize: "0.9rem",
+                    color: CSS_VARS.muted,
+                    fontSize: "0.7rem",
                     textTransform: "uppercase",
                     fontWeight: 600,
+                    letterSpacing: "0.1em",
                   }}
                 >
-                  Sacred Seal
+                  API Key
                 </p>
                 <p
                   style={{
                     margin: 0,
-                    color: "#a8a878",
-                    fontSize: "1.1rem",
+                    color: CSS_VARS.accent2,
+                    fontSize: "0.9rem",
                     fontWeight: 600,
-                    fontFamily: "monospace",
+                    fontFamily: "'Space Mono', monospace",
+                    letterSpacing: "0.05em",
                   }}
                 >
                   {configStatus.openai_token_masked}
@@ -215,77 +222,60 @@ export default function ConfirmationScreen({
           <button
             onClick={onContinue}
             style={{
-              padding: "1.2rem 2rem",
-              background: "linear-gradient(135deg, #c84a1a 0%, #8b3a0a 100%)",
-              color: "#ffd700",
-              border: "2px solid #d4af37",
-              borderRadius: "4px",
-              fontSize: "1.1rem",
+              padding: "1rem 2rem",
+              background: CSS_VARS.accent,
+              color: "#000",
+              border: `2px solid ${CSS_VARS.accent}`,
+              borderRadius: "6px",
+              fontSize: "0.75rem",
               fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
               cursor: "pointer",
-              transition: "all 0.3s ease",
-              boxShadow: "0 8px 20px rgba(200, 74, 26, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-              textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
-              letterSpacing: "0.05em",
+              transition: "all 0.2s",
+              boxShadow: `0 0 20px rgba(0,229,255,0.3)`,
             }}
             onMouseEnter={(e) => {
-              ;(e.target as HTMLButtonElement).style.transform =
-                "translateY(-3px)"
               ;(e.target as HTMLButtonElement).style.boxShadow =
-                "0 12px 30px rgba(200, 74, 26, 0.6), inset 0 1px 0 rgba(255,255,255,0.3)"
-              ;(e.target as HTMLButtonElement).style.background =
-                "linear-gradient(135deg, #d45a2a 0%, #9b4a1a 100%)"
+                "0 0 30px rgba(0,229,255,0.6)"
+              ;(e.target as HTMLButtonElement).style.transform =
+                "translateY(-2px)"
             }}
             onMouseLeave={(e) => {
-              ;(e.target as HTMLButtonElement).style.transform = "translateY(0)"
               ;(e.target as HTMLButtonElement).style.boxShadow =
-                "0 8px 20px rgba(200, 74, 26, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)"
-              ;(e.target as HTMLButtonElement).style.background =
-                "linear-gradient(135deg, #c84a1a 0%, #8b3a0a 100%)"
+                "0 0 20px rgba(0,229,255,0.3)"
+              ;(e.target as HTMLButtonElement).style.transform = "translateY(0)"
             }}
           >
-            ENTER THE REALM 🎯
+            Start Your First Fire
           </button>
 
           <button
             onClick={onBack}
             style={{
-              padding: "1rem",
-              background: "rgba(139, 90, 43, 0.2)",
-              color: "#c19a6b",
-              border: "2px solid #8b5a2b",
-              borderRadius: "4px",
-              fontSize: "1rem",
+              padding: "0.85rem 2rem",
+              background: "transparent",
+              color: CSS_VARS.muted,
+              border: `1px solid ${CSS_VARS.border}`,
+              borderRadius: "6px",
+              fontSize: "0.75rem",
               fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
               cursor: "pointer",
-              transition: "all 0.3s ease",
+              transition: "all 0.2s",
             }}
             onMouseEnter={(e) => {
-              ;(e.target as HTMLButtonElement).style.background =
-                "rgba(139, 90, 43, 0.4)"
-              ;(e.target as HTMLButtonElement).style.borderColor = "#c19a6b"
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent2
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.accent2
             }}
             onMouseLeave={(e) => {
-              ;(e.target as HTMLButtonElement).style.background =
-                "rgba(139, 90, 43, 0.2)"
-              ;(e.target as HTMLButtonElement).style.borderColor = "#8b5a2b"
+              ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.border
+              ;(e.target as HTMLButtonElement).style.color = CSS_VARS.muted
             }}
           >
-            Reconsider Seal
+            Back
           </button>
-        </div>
-
-        {/* Runic border bottom */}
-        <div
-          style={{
-            marginTop: "2rem",
-            color: "#c19a6b",
-            fontSize: "1.1rem",
-            letterSpacing: "0.3em",
-            opacity: 0.7,
-          }}
-        >
-          ᚠ ᛁ ᚱ ᛖ 🔥
         </div>
       </div>
     </div>
