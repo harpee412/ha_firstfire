@@ -27,6 +27,9 @@ export interface ChatResponse {
   response: string
   tokens_used: number
   model: string
+  agent?: string
+  router_selected?: string
+  conversation_id?: string
 }
 
 export interface ValidationResponse {
