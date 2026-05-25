@@ -47,6 +47,7 @@ class InfluxDBConnector:
             use_v1: Force use of InfluxDB 1.x
         """
         self.url = url
+        self.bucket = bucket or "home_assistant"
         self.client = None
         self.query_api = None
         self.is_v1 = use_v1
