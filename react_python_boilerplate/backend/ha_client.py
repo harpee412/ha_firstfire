@@ -11,13 +11,17 @@ from pathlib import Path
 
 
 class HomeAssistantClient:
-    """Client for Home Assistant API calls"""
+    """Client for Home Assistant API calls via supervisor"""
 
     def __init__(self):
-        """Initialize HA client with supervisor token and URL"""
+        """Initialize HA client with supervisor token and gateway"""
         self.supervisor_token = os.getenv("SUPERVISOR_TOKEN")
-        self.ha_url = "http://localhost:8123"
+        # Use supervisor API gateway to reach Home Assistant Core
+        self.ha_url = "http://supervisor/core/api"
         self.timeout = 10
+
+        if not self.supervisor_token:
+            print("Warning: SUPERVISOR_TOKEN not set. HA API calls will fail.")
 
     async def get_entities(self) -> Dict[str, Any]:
         """Fetch all entities from Home Assistant"""
