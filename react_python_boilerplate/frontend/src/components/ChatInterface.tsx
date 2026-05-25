@@ -25,6 +25,7 @@ export default function ChatInterface() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -52,9 +53,14 @@ export default function ChatInterface() {
     setIsLoading(true)
 
     try {
-      const response = await sendChat(userMessage)
+      const response = await sendChat(userMessage, conversationId)
 
       if (response.success && response.data) {
+        // Store conversation_id from response if this is first message
+        if (!conversationId && response.data.conversation_id) {
+          setConversationId(response.data.conversation_id)
+        }
+
         const assistantMsg: Message = {
           id: `assistant-${Date.now()}`,
           role: "assistant",
