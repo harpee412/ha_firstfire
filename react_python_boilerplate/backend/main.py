@@ -15,9 +15,11 @@ if config.is_influxdb_configured():
     try:
         init_influxdb(
             url=config.influxdb_url,
-            token=config.influxdb_token,
-            org=config.influxdb_org,
+            token_or_password=config.influxdb_token,
+            org_or_database=config.influxdb_org,
             bucket=config.influxdb_bucket,
+            username=config.influxdb_username,
+            use_v1=config.influxdb_v1,
         )
         print(f"✓ InfluxDB connected: {config.influxdb_url}")
     except Exception as e:
