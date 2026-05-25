@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional
 from ..config import get_config_manager, get_config, FirstFireConfig
-from ..agents import SystemAgent
+from ..agents.agent_router import AgentRouter
 import openai
 
 router = APIRouter()
@@ -212,10 +212,16 @@ async def get_available_models() -> ChatResponse:
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     """
-    Send a message to the SystemAgent and get a markdown-formatted response
+    Send a message to FirstFire's multi-agent system
 
-    The SystemAgent has direct Home Assistant API access and provides
-    high-level visibility into entities, automations, integrations, and metrics.
+    The router automatically selects the appropriate agent:
+    - LightAgent for lighting questions
+    - SwitchAgent for switch/device control
+    - AutomationAgent for automation help
+    - SystemAgent for general system questions
+
+    All agents have direct Home Assistant API access and return
+    markdown-formatted responses for readability.
     """
     try:
         config = get_config()
@@ -230,9 +236,9 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 }
             )
 
-        # Use SystemAgent to process message with HA API access
-        agent = SystemAgent()
-        result = await agent.process_message(request.message)
+        # Route to appropriate agent based on message content
+        router = AgentRouter()
+        result = await router.route(request.message)
 
         if result.get("success"):
             return ChatResponse(
@@ -240,7 +246,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 data={
                     "response": result.get("response"),
                     "tokens_used": result.get("tokens_used", 0),
-                    "agent": result.get("metadata", {}).get("agent", "SystemAgent"),
+                    "agent": result.get("metadata", {}).get("agent", "Unknown"),
+                    "router_selected": result.get("metadata", {}).get("router_selected", "Unknown"),
                 }
             )
         else:

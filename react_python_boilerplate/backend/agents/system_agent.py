@@ -1,10 +1,10 @@
 """
-SystemAgent - High-level visibility into Home Assistant system
-Queries entities, automations, integrations, and metrics
+SystemAgent - High-level overview of Home Assistant system
+Provides counts and status without dumping raw data
+Routes to specialized agents for domain-specific questions
 """
 
-import json
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from openai import AsyncOpenAI, OpenAIError
 from ..config import get_config
 from ..ha_client import HomeAssistantClient
@@ -34,27 +34,34 @@ class SystemAgent(BaseAgent):
 
     def _build_system_prompt(self) -> str:
         """Build system prompt for SystemAgent"""
-        return """You are FirstFire's System Agent - the high-level overseer of a Home Assistant installation.
+        return """You are FirstFire's System Agent - the general-purpose guide for Home Assistant.
 
 Your role is to:
-1. Help users understand their Home Assistant system at a glance
-2. Explain entities (devices, automations, integrations)
-3. Identify gaps, redundancies, or optimization opportunities
-4. Provide setup guidance and best practices
-5. Answer questions about system state and capabilities
+1. Provide high-level system status and overview
+2. Answer general Home Assistant questions
+3. Explain when to ask other specialized agents (LightAgent, SwitchAgent, AutomationAgent)
+4. Guide users on Home Assistant best practices
+5. Help users understand their system structure
 
-Always respond in Markdown format for clarity. Use headers, lists, and formatting to make information scannable.
+IMPORTANT: You have access to high-level system counts but NOT raw device data.
+- For questions about specific lights: suggest asking the LightAgent ("Ask me about lights")
+- For questions about switches/plugs: suggest asking the SwitchAgent ("Ask me about switches")
+- For questions about automations: suggest asking the AutomationAgent ("Ask me about automations")
+
+Always respond in Markdown format. Be helpful and route users to specialists when needed.
 
 Key principles:
-- Be concise but thorough
-- Group related information
-- Highlight important details with emphasis (*bold*, `code`)
-- Use lists and tables when showing multiple items
-- Suggest improvements when you see opportunities"""
+- Be concise and high-level
+- Suggest specialized agents for domain-specific questions
+- Highlight system status and configuration
+- Provide practical guidance"""
 
     async def process_message(self, user_message: str) -> Dict[str, Any]:
         """
-        Process message using Claude with HA API tools
+        Process message with high-level system context
+
+        Note: SystemAgent does NOT use tool calls. It provides high-level
+        system status and routes users to specialized domain agents.
 
         Args:
             user_message: User's question about the system
@@ -63,13 +70,10 @@ Key principles:
             Dict with response, token count, and metadata
         """
         try:
-            # Gather system context
+            # Gather system context (counts only, no raw data)
             system_context = await self._gather_system_context()
 
-            # Prepare tools for Claude to call HA
-            tools = self._get_tools()
-
-            # Initial message with context
+            # Initial message with minimal context
             messages = [
                 {
                     "role": "system",
@@ -80,28 +84,26 @@ Key principles:
                     "content": f"""System Context:
 {system_context}
 
-User Question: {user_message}"""
+User Question: {user_message}
+
+Note: For specific domain questions (lights, switches, automations), the user's agent router
+will automatically route to specialized agents. But you can provide guidance here."""
                 }
             ]
 
-            # Call Claude with tool use
+            # Call OpenAI WITHOUT tools - just direct response
             response = await self.client.chat.completions.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
-                messages=messages,
-                tools=tools,
-                tool_choice="auto"
+                messages=messages
+                # NO tools - we're keeping context lean to avoid token overflow
             )
 
-            # Process response
             tokens_used = response.usage.total_tokens if response.usage else 0
-
-            # Handle tool calls if present
-            final_response = await self._process_response(response, messages)
 
             return {
                 "success": True,
-                "response": final_response,
+                "response": response.choices[0].message.content or "No response",
                 "tokens_used": tokens_used,
                 "metadata": {
                     "agent": "SystemAgent",
@@ -181,121 +183,3 @@ User Question: {user_message}"""
             counts[etype] = counts.get(etype, 0) + 1
         return dict(sorted(counts.items()))
 
-    def _get_tools(self) -> list:
-        """Define tools Claude can use to query HA"""
-        return [
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_entities",
-                    "description": "Get all Home Assistant entities (lights, switches, sensors, etc.)",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_automations",
-                    "description": "Get all Home Assistant automations",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_integrations",
-                    "description": "Get installed Home Assistant integrations",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_entity_state",
-                    "description": "Get current state of a specific entity",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "entity_id": {
-                                "type": "string",
-                                "description": "Entity ID (e.g., 'light.living_room')"
-                            }
-                        },
-                        "required": ["entity_id"]
-                    }
-                }
-            }
-        ]
-
-    async def _process_response(
-        self, response: Any, messages: list
-    ) -> str:
-        """Process Claude response, handling tool calls if needed"""
-        if response.choices[0].finish_reason == "tool_calls":
-            # Handle tool calls
-            tool_calls = response.choices[0].message.tool_calls
-            tool_results = []
-
-            for tool_call in tool_calls:
-                result = await self._handle_tool_call(
-                    tool_call.function.name,
-                    json.loads(tool_call.function.arguments)
-                )
-                tool_results.append({
-                    "tool_call_id": tool_call.id,
-                    "result": result
-                })
-
-            # Continue conversation with tool results
-            messages.append({
-                "role": "assistant",
-                "content": response.choices[0].message.content or ""
-            })
-
-            for tool_result in tool_results:
-                messages.append({
-                    "role": "user",
-                    "content": f"Tool result: {tool_result['result']}"
-                })
-
-            # Get final response
-            final_response = await self.client.chat.completions.create(
-                model=self.model,
-                max_tokens=self.max_tokens,
-                messages=messages
-            )
-
-            return final_response.choices[0].message.content or "No response"
-        else:
-            # Direct response
-            return response.choices[0].message.content or "No response"
-
-    async def _handle_tool_call(self, tool_name: str, args: Dict) -> str:
-        """Handle Claude's tool calls to HA API"""
-        try:
-            if tool_name == "get_entities":
-                result = await self.ha_client.get_entities()
-            elif tool_name == "get_automations":
-                result = await self.ha_client.get_automations()
-            elif tool_name == "get_integrations":
-                result = await self.ha_client.get_integrations()
-            elif tool_name == "get_entity_state":
-                result = await self.ha_client.get_entity_state(args.get("entity_id", ""))
-            else:
-                result = {"success": False, "error": f"Unknown tool: {tool_name}"}
-
-            return json.dumps(result)
-        except Exception as e:
-            return json.dumps({"success": False, "error": str(e)})
