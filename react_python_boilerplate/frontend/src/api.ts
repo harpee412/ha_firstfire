@@ -12,41 +12,68 @@ import {
   OpenAIModel,
 } from "./types"
 
-// Detect Home Assistant ingress proxy context
-// In HA ingress, window.location.pathname is something like: /api/addons/abc123/proxy/
-// API calls should use relative paths that the proxy will route to the backend
+// Clean up service workers that might be caching old routes
+const cleanupServiceWorkers = async () => {
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations()
+    for (const registration of registrations) {
+      // Unregister old service workers that might be interfering
+      await registration.unregister()
+      console.log("Unregistered service worker:", registration.scope)
+    }
+  } catch (e) {
+    console.log("No service workers to clean up")
+  }
+}
+
+// Run cleanup on load
+if ("serviceWorker" in navigator) {
+  cleanupServiceWorkers()
+}
+
+// Detect API base URL - works for both local dev and HA ingress
 const getAPIBase = (): string => {
   const path = window.location.pathname
+  const hostname = window.location.hostname
 
-  // Home Assistant ingress proxy pattern: /api/addons/{addon_id}/proxy
-  // In this context, relative paths go directly to the backend (no /api prefix needed)
-  if (path.includes("/api/addons/") && path.includes("/proxy")) {
-    // Running in Home Assistant ingress - use relative path without /api prefix
-    return ""
+  console.log("🔥 FirstFire API Config:", {
+    pathname: path,
+    hostname,
+    href: window.location.href,
+  })
+
+  // Home Assistant Nabu Casa detection
+  if (hostname.includes("nabu.casa") || hostname.includes("local.hass.io")) {
+    // Nabu Casa Cloud uses ingress at a specific path
+    // Just use relative paths that will be routed through the proxy
+    console.log("🔥 Detected Home Assistant Cloud/Local")
+    return "."
   }
 
-  // Local development - use ./api prefix
+  // Home Assistant ingress proxy pattern: /api/addons/{addon_id}/proxy
+  if (path.includes("/api/addons/") && path.includes("/proxy")) {
+    console.log("🔥 Detected Home Assistant ingress proxy")
+    return "."
+  }
+
+  // Local development
+  console.log("🔥 Detected local development")
   return "./api"
 }
 
 const API_BASE = getAPIBase()
 
 /**
- * Generic API call handler
+ * Generic API call handler with comprehensive error handling
  */
 async function apiCall<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  // Construct URL - handle both with and without API_BASE prefix
-  let url: string
-  if (API_BASE === "") {
-    // Home Assistant ingress context - endpoint is relative path from /api/addons/{id}/proxy/
-    url = `/api${endpoint}`
-  } else {
-    // Local development or absolute path
-    url = `${API_BASE}${endpoint}`
-  }
+  // Construct URL
+  const url = `${API_BASE}/api${endpoint}`
+
+  console.log(`🔥 API Call: ${options.method || "GET"} ${url}`)
 
   try {
     const response = await fetch(url, {
@@ -57,20 +84,51 @@ async function apiCall<T = any>(
       ...options,
     })
 
+    const contentType = response.headers.get("content-type")
+
     if (!response.ok) {
+      // Try to parse error response
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+
+      if (contentType?.includes("application/json")) {
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error?.message || errorData.message || errorMessage
+        } catch (e) {
+          // Response wasn't JSON, use default message
+        }
+      }
+
+      console.error(`🔥 API Error [${response.status}]:`, errorMessage)
+
       return {
         success: false,
         error: {
           code: `HTTP_${response.status}`,
-          message: `HTTP ${response.status}: ${response.statusText}`,
+          message: errorMessage,
+        },
+      }
+    }
+
+    // Only try to parse JSON if content-type indicates it
+    if (!contentType?.includes("application/json")) {
+      console.warn(`🔥 Non-JSON response from ${url}:`, contentType)
+      return {
+        success: false,
+        error: {
+          code: "INVALID_RESPONSE",
+          message: "Backend returned non-JSON response",
         },
       }
     }
 
     const data = await response.json()
+    console.log(`🔥 API Success [${response.status}]:`, endpoint)
     return data as ApiResponse<T>
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error"
+    console.error(`🔥 API Network Error:`, message)
+
     return {
       success: false,
       error: {
