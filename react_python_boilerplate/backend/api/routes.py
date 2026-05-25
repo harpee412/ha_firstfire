@@ -1,13 +1,14 @@
 """
 FirstFire API Routes
 
-Handles configuration, validation, and OpenAI chat endpoints
+Handles configuration, validation, and agent-powered chat endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, List
-from ..config import get_config_manager, get_config, ConfigManager, FirstFireConfig
+from typing import Optional
+from ..config import get_config_manager, get_config, FirstFireConfig
+from ..agents import SystemAgent
 import openai
 
 router = APIRouter()
@@ -141,8 +142,6 @@ async def get_config_status() -> ChatResponse:
 async def validate_token(request: ConfigInitRequest) -> ValidationResponse:
     """Validate OpenAI token without storing it"""
     try:
-        from config import FirstFireConfig
-
         # Validate format
         config = FirstFireConfig(openai_token=request.openai_token)
 
@@ -212,7 +211,12 @@ async def get_available_models() -> ChatResponse:
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
-    """Send a message to OpenAI and get a response"""
+    """
+    Send a message to the SystemAgent and get a markdown-formatted response
+
+    The SystemAgent has direct Home Assistant API access and provides
+    high-level visibility into entities, automations, integrations, and metrics.
+    """
     try:
         config = get_config()
 
@@ -222,73 +226,30 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 success=False,
                 error={
                     "code": "NOT_CONFIGURED",
-                    "message": "OpenAI API token not configured. Please configure it in the app settings."
+                    "message": "OpenAI API token not configured. Please configure it in settings."
                 }
             )
 
-        # Set OpenAI API key
-        openai.api_key = config.openai_token
+        # Use SystemAgent to process message with HA API access
+        agent = SystemAgent()
+        result = await agent.process_message(request.message)
 
-        # Create chat completion
-        try:
-            response = openai.chat.completions.create(
-                model=config.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": config.system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": request.message
-                    }
-                ],
-                max_tokens=config.max_tokens,
-                temperature=0.7,
-            )
-
-            message_content = response.choices[0].message.content
-            tokens_used = response.usage.total_tokens if response.usage else 0
-
+        if result.get("success"):
             return ChatResponse(
                 success=True,
                 data={
-                    "response": message_content,
-                    "tokens_used": tokens_used,
-                    "model": config.model,
+                    "response": result.get("response"),
+                    "tokens_used": result.get("tokens_used", 0),
+                    "agent": result.get("metadata", {}).get("agent", "SystemAgent"),
                 }
             )
-
-        except openai.RateLimitError:
+        else:
+            error_message = result.get("error", "Unknown agent error")
             return ChatResponse(
                 success=False,
                 error={
-                    "code": "RATE_LIMIT",
-                    "message": "Rate limited by OpenAI API. Please wait a moment and try again."
-                }
-            )
-        except openai.AuthenticationError:
-            return ChatResponse(
-                success=False,
-                error={
-                    "code": "AUTH_ERROR",
-                    "message": "OpenAI API token is invalid. Please check your token in settings."
-                }
-            )
-        except openai.APIConnectionError:
-            return ChatResponse(
-                success=False,
-                error={
-                    "code": "CONNECTION_ERROR",
-                    "message": "Failed to connect to OpenAI API. Please check your internet connection."
-                }
-            )
-        except Exception as e:
-            return ChatResponse(
-                success=False,
-                error={
-                    "code": "API_ERROR",
-                    "message": f"OpenAI API error: {str(e)}"
+                    "code": "AGENT_ERROR",
+                    "message": error_message
                 }
             )
 

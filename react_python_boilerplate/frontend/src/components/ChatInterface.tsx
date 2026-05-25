@@ -1,9 +1,10 @@
 /**
  * FirstFire Chat Interface Component
- * Cyberpunk/Sci-Fi Design
+ * Cyberpunk/Sci-Fi Design with Markdown rendering
  */
 
 import { useState, useRef, useEffect } from "react"
+import ReactMarkdown from "react-markdown"
 import { sendChat, Storage } from "../api"
 import { Message } from "../types"
 
@@ -361,7 +362,71 @@ export default function ChatInterface() {
                     : "none",
               }}
             >
-              {msg.content}
+              {msg.role === "assistant" ? (
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => (
+                      <h1 style={{ fontSize: "1.3rem", marginTop: "0.5rem", marginBottom: "0.5rem", color: CSS_VARS.accent }}>
+                        {children}
+                      </h1>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 style={{ fontSize: "1.1rem", marginTop: "0.4rem", marginBottom: "0.4rem", color: CSS_VARS.accent }}>
+                        {children}
+                      </h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 style={{ fontSize: "1rem", marginTop: "0.3rem", marginBottom: "0.3rem", color: CSS_VARS.accent }}>
+                        {children}
+                      </h3>
+                    ),
+                    p: ({ children }) => (
+                      <p style={{ marginBottom: "0.5rem", marginTop: 0 }}>
+                        {children}
+                      </p>
+                    ),
+                    ul: ({ children }) => (
+                      <ul style={{ marginLeft: "1.5rem", marginTop: "0.3rem", marginBottom: "0.5rem" }}>
+                        {children}
+                      </ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol style={{ marginLeft: "1.5rem", marginTop: "0.3rem", marginBottom: "0.5rem" }}>
+                        {children}
+                      </ol>
+                    ),
+                    li: ({ children }) => (
+                      <li style={{ marginBottom: "0.2rem" }}>
+                        {children}
+                      </li>
+                    ),
+                    code: ({ children }) => (
+                      <code style={{ background: CSS_VARS.surface2, padding: "0.2rem 0.4rem", borderRadius: "3px", color: CSS_VARS.accent3, fontFamily: "'Space Mono', monospace", fontSize: "0.8rem" }}>
+                        {children}
+                      </code>
+                    ),
+                    pre: ({ children }) => (
+                      <pre style={{ background: CSS_VARS.surface2, padding: "0.75rem", borderRadius: "4px", overflow: "auto", marginTop: "0.3rem", marginBottom: "0.5rem", border: `1px solid ${CSS_VARS.border}` }}>
+                        {children}
+                      </pre>
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote style={{ borderLeft: `3px solid ${CSS_VARS.accent}`, paddingLeft: "0.75rem", marginLeft: 0, marginTop: "0.3rem", marginBottom: "0.5rem", opacity: 0.8 }}>
+                        {children}
+                      </blockquote>
+                    ),
+                    strong: ({ children }) => (
+                      <strong style={{ color: CSS_VARS.accent, fontWeight: 700 }}>
+                        {children}
+                      </strong>
+                    ),
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              ) : (
+                msg.content
+              )}
               {msg.tokens_used && (
                 <div
                   style={{
