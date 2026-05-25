@@ -74,23 +74,31 @@ class AgentRouter:
         Select agent based on message content
 
         Priority:
-        1. Direct keyword match
-        2. Intent analysis
-        3. Default to SystemAgent
+        1. Direct keyword match (lights/switches/automations)
+        2. Entity type detection (light entities vs switch entities)
+        3. Action-based intent
+        4. Default to SystemAgent
         """
         message_lower = user_message.lower()
 
-        # Check for direct keyword matches
+        # Check for direct keyword matches - HIGHEST PRIORITY
         for keyword, agent in self.agent_keywords.items():
             if keyword in message_lower:
                 return agent
 
-        # Check for action-based intent
+        # Check for action-based intent (specific control operations)
         if self._is_automation_intent(message_lower):
             return self.automation_agent
 
-        # Check for domain-specific questions
+        # If no explicit keywords, but there's a location/room reference,
+        # it's likely a LIGHT control (rooms are lights)
         if self._is_light_intent(message_lower):
+            return self.light_agent
+
+        # Control actions without explicit "light" keyword might still be lights
+        # (e.g., "turn off basement desk" - could be lights or switches)
+        # Default to light since more common than switches
+        if any(phrase in message_lower for phrase in ["turn on", "turn off", "toggle", "dim", "brighten"]):
             return self.light_agent
 
         if self._is_switch_intent(message_lower):
@@ -109,8 +117,18 @@ class AgentRouter:
 
     @staticmethod
     def _is_light_intent(message: str) -> bool:
-        """Check if message is about lights specifically"""
-        light_words = ["bright", "dim", "color", "room", "living room", "bedroom", "kitchen"]
+        """
+        Check if message is about lights specifically
+        Includes: brightness control, color, rooms, desk, etc.
+        """
+        light_words = [
+            "bright", "dim", "color", "room",
+            "living room", "bedroom", "kitchen", "basement", "garage",
+            "desk", "hallway", "hallways", "porch", "deck", "patio",
+            "office", "master", "upstairs", "downstairs", "laundry",
+            "pantry", "mudroom", "bathroom", "closet", "shelf",
+            "lamp", "lamps", "lighting", "glow", "hue"
+        ]
         return any(word in message for word in light_words)
 
     @staticmethod

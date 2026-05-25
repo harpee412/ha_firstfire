@@ -20,7 +20,11 @@ const CSS_VARS = {
   muted: "#5c6394",
 }
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  onBackToDashboard?: () => void
+}
+
+export default function ChatInterface({ onBackToDashboard }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -142,6 +146,38 @@ export default function ChatInterface() {
             gap: "1rem",
           }}
         >
+          {onBackToDashboard && (
+            <button
+              onClick={onBackToDashboard}
+              style={{
+                padding: "0.65rem 1.25rem",
+                background: "transparent",
+                color: CSS_VARS.muted,
+                border: `1px solid ${CSS_VARS.border}`,
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.65rem",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                transition: "all 0.2s",
+                fontFamily: "'Noto Sans Mono', monospace",
+              }}
+              onMouseEnter={(e) => {
+                ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.accent
+                ;(e.target as HTMLButtonElement).style.color = CSS_VARS.accent
+                ;(e.target as HTMLButtonElement).style.boxShadow =
+                  "0 0 15px rgba(0,229,255,0.2)"
+              }}
+              onMouseLeave={(e) => {
+                ;(e.target as HTMLButtonElement).style.borderColor = CSS_VARS.border
+                ;(e.target as HTMLButtonElement).style.color = CSS_VARS.muted
+                ;(e.target as HTMLButtonElement).style.boxShadow = "none"
+              }}
+            >
+              Back to Dashboard
+            </button>
+          )}
+
           <button
             onClick={handleClearChat}
             style={{

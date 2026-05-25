@@ -19,6 +19,7 @@ import {
 import WelcomeScreen from "./components/WelcomeScreen"
 import TokenSetupScreen from "./components/TokenSetupScreen"
 import ConfirmationScreen from "./components/ConfirmationScreen"
+import Dashboard from "./components/Dashboard"
 import ChatInterface from "./components/ChatInterface"
 
 interface OnboardingFlowProps {
@@ -29,7 +30,7 @@ export default function OnboardingFlow({
   onComplete,
 }: OnboardingFlowProps) {
   const [step, setStep] =
-    useState<OnboardingStep>("welcome")
+    useState<OnboardingStep | "dashboard" | "chat">("welcome")
 
   const [isLoading, setIsLoading] =
     useState(false)
@@ -50,7 +51,7 @@ export default function OnboardingFlow({
           response.success &&
           response.data?.configured
         ) {
-          setStep("chat")
+          setStep("dashboard")
           return
         }
       } catch (err) {
@@ -62,7 +63,7 @@ export default function OnboardingFlow({
       const savedToken = Storage.getToken()
 
       if (savedToken) {
-        setStep("chat")
+        setStep("dashboard")
       }
     }
 
@@ -121,7 +122,7 @@ export default function OnboardingFlow({
   }
 
   const handleConfirmationContinue = () => {
-    setStep("chat")
+    setStep("dashboard")
 
     if (onComplete) {
       onComplete()
@@ -163,8 +164,19 @@ export default function OnboardingFlow({
           />
         )
 
+      case "dashboard":
+        return (
+          <Dashboard
+            onNavigateToChat={() => setStep("chat")}
+          />
+        )
+
       case "chat":
-        return <ChatInterface />
+        return (
+          <ChatInterface
+            onBackToDashboard={() => setStep("dashboard")}
+          />
+        )
 
       default:
         return null
