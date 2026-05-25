@@ -1,5 +1,5 @@
 """
-Switch Agent - Specializes in switch entity management
+Switch Agent - Specializes in switch entity management and control
 """
 
 from typing import List, Dict, Any
@@ -8,10 +8,12 @@ from .domain_agent import DomainAgent
 
 class SwitchAgent(DomainAgent):
     """
-    Agent for managing switches in Home Assistant
+    Agent for managing and controlling switches in Home Assistant
 
     Capabilities:
     - Query switch status and history
+    - Control switches: turn on/off, toggle
+    - Monitor power consumption
     - Suggest switch automation patterns
     - Help with relay control and smart plugs
     - Troubleshoot switch connectivity
@@ -25,19 +27,24 @@ class SwitchAgent(DomainAgent):
         return """You are FirstFire's Switch Agent - specializing in smart switches and relays.
 
 Your expertise includes:
-1. Smart switch status and control (on/off)
+1. Smart switch status and control (turn on/off, toggle)
 2. Smart plugs, relays, and outlet control
 3. Switch automation for schedules and conditions
-4. Energy monitoring for smart plugs
+4. Energy monitoring for smart plugs (power draw, voltage)
 5. Troubleshooting connection and control issues
 
-You have access to current switch entity data from Home Assistant.
+You can take action on switches:
+- "Turn on the kitchen outlet" → Execute turn_on
+- "Turn off all switches" → Turn off each switch mentioned
+- "Which device uses the most power?" → Analyze power draw
+- Always confirm what you're doing first if it's a control action
 
 Always respond in Markdown format. When discussing:
 - Multiple switches: group by type (smart plugs, wall switches, relays) or location
 - Specific switch: show current state, power draw if available, associated automations
+- Control actions: confirm what you'll do, then report success/failure
 - Automations: suggest practical patterns (time-based on/off, condition-triggered control, scenes)
-- Power monitoring: highlight high-consumption devices
+- Power monitoring: highlight high-consumption devices, calculate totals
 
 Be practical and helpful. Focus on reliability and safety of electrical control."""
 
@@ -111,3 +118,19 @@ Be practical and helpful. Focus on reliability and safety of electrical control.
                 output.append(f"- {switch_type.replace('_', ' ').title()}: {count}")
 
         return "\n".join(output)
+
+    # =========================================================================
+    # Switch Control Actions
+    # =========================================================================
+
+    async def turn_on(self, entity_id: str) -> Dict[str, Any]:
+        """Turn on a switch"""
+        return await self.ha_client.turn_on_switch(entity_id)
+
+    async def turn_off(self, entity_id: str) -> Dict[str, Any]:
+        """Turn off a switch"""
+        return await self.ha_client.turn_off_switch(entity_id)
+
+    async def toggle(self, entity_id: str) -> Dict[str, Any]:
+        """Toggle a switch on/off"""
+        return await self.ha_client.toggle_switch(entity_id)

@@ -1,5 +1,5 @@
 """
-Light Agent - Specializes in light entity management
+Light Agent - Specializes in light entity management and control
 """
 
 from typing import List, Dict, Any
@@ -8,10 +8,11 @@ from .domain_agent import DomainAgent
 
 class LightAgent(DomainAgent):
     """
-    Agent for managing lights in Home Assistant
+    Agent for managing and controlling lights in Home Assistant
 
     Capabilities:
     - Query light status, brightness, color
+    - Control lights: turn on/off, adjust brightness, set color
     - Suggest lighting automations
     - Explain light capabilities and features
     - Help with scenes and groups
@@ -25,17 +26,23 @@ class LightAgent(DomainAgent):
         return """You are FirstFire's Light Agent - specializing in smart lighting.
 
 Your expertise includes:
-1. Smart light status, brightness, color temperature, RGB colors
-2. Light groups, scenes, and automation
-3. Energy efficiency and lighting automation recommendations
-4. Troubleshooting light connectivity issues
-5. Explaining features like color modes, brightness transitions, effects
+1. Smart light status, brightness (0-255), color temperature, RGB colors
+2. Controlling lights: turn on/off, dim, brighten, change colors
+3. Light groups, scenes, and automation
+4. Energy efficiency and lighting automation recommendations
+5. Troubleshooting light connectivity issues
+6. Explaining features like color modes, brightness transitions, effects
 
-You have access to current light entity data from Home Assistant.
+You can take action on lights:
+- "Turn on the living room light" → Execute turn_on
+- "Dim bedroom to 50%" → Set brightness to ~128
+- "Turn off all lights" → Turn off each light mentioned
+- Always confirm what you're doing first if it's a control action
 
 Always respond in Markdown format. When discussing:
 - Multiple lights: show as a list grouped by room or status
 - Specific light: show current state, brightness (0-255), color info
+- Control actions: confirm what you'll do, then report success/failure
 - Automations: suggest practical lighting scenarios (morning wake-up, evening dimming, away mode)
 - Technical details: use code blocks for state values and service calls
 
@@ -104,3 +111,29 @@ Be friendly and practical. Focus on what lights are actually capable of."""
                 output.append(f"- {room}: {len(lights)} lights")
 
         return "\n".join(output)
+
+    # =========================================================================
+    # Light Control Actions
+    # =========================================================================
+
+    async def turn_on(self, entity_id: str, brightness: int = None) -> Dict[str, Any]:
+        """Turn on a light with optional brightness (0-255 or percentage)"""
+        # If brightness is a percentage (0-100), convert to 0-255
+        if brightness and brightness <= 100:
+            brightness = int((brightness / 100) * 255)
+
+        return await self.ha_client.turn_on_light(entity_id, brightness=brightness)
+
+    async def turn_off(self, entity_id: str) -> Dict[str, Any]:
+        """Turn off a light"""
+        return await self.ha_client.turn_off_light(entity_id)
+
+    async def toggle(self, entity_id: str) -> Dict[str, Any]:
+        """Toggle a light on/off"""
+        return await self.ha_client.toggle_light(entity_id)
+
+    async def set_brightness(self, entity_id: str, brightness: int) -> Dict[str, Any]:
+        """Set brightness (accepts 0-100 percentage or 0-255 value)"""
+        if brightness <= 100:
+            brightness = int((brightness / 100) * 255)
+        return await self.ha_client.set_light_brightness(entity_id, brightness)
