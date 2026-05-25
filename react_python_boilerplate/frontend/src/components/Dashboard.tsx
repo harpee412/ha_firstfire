@@ -60,13 +60,20 @@ export default function Dashboard({ onNavigateToChat }: DashboardProps) {
         }
 
         // Fetch InfluxDB status
-        const influxResponse = await fetch("/api/influxdb/status")
-        const influxData = await influxResponse.json()
-        if (influxData.success && influxData.data) {
-          setInfluxdb({
-            configured: influxData.data.configured,
-            connected: influxData.data.connected,
-          })
+        try {
+          const influxResponse = await fetch("./api/influxdb/status")
+          if (influxResponse.ok) {
+            const influxData = await influxResponse.json()
+            if (influxData.success && influxData.data) {
+              setInfluxdb({
+                configured: influxData.data.configured,
+                connected: influxData.data.connected,
+              })
+            }
+          }
+        } catch (e) {
+          // InfluxDB status is optional, silently fail
+          console.log("InfluxDB status unavailable")
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to fetch status"
