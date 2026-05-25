@@ -320,17 +320,33 @@ User Question: {user_message}"""
         Lightweight intent parsing without LLM calls
 
         Returns categories like: "status", "control", "config", "help"
+
+        CRITICAL: Control intents MUST be detected accurately because they bypass OpenAI
+        and go directly to device control (no asking for confirmation).
         """
         message_lower = user_message.lower()
 
-        if any(word in message_lower for word in ["turn on", "turn off", "set", "change", "adjust"]):
+        # CONTROL INTENTS - These execute directly, no OpenAI, no asking
+        if any(phrase in message_lower for phrase in ["turn on", "turn off", "toggle"]):
             return "control"
-        elif any(word in message_lower for word in ["how many", "what is", "show", "list", "count"]):
+        elif any(word in message_lower for word in ["set ", "change ", "adjust ", "dim ", "brighten "]):
+            return "control"
+        elif any(word in message_lower for word in ["switch ", "flip "]):
+            return "control"
+
+        # STATUS INTENTS - Query current state
+        elif any(word in message_lower for word in ["how many", "what is", "show", "list", "count", "status"]):
             return "status"
+
+        # CONFIG/AUTOMATION INTENTS
         elif any(word in message_lower for word in ["config", "setup", "automations", "schedule"]):
             return "config"
+
+        # HELP INTENTS
         elif any(word in message_lower for word in ["help", "what can", "how do", "explain"]):
             return "help"
+
+        # DEFAULT
         else:
             return "general"
 
