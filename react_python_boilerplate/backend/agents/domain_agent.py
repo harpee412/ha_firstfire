@@ -252,6 +252,8 @@ User Question: {user_message}"""
 
     async def _execute_control_action(self, action: str, entity_id: str) -> Dict[str, Any]:
         """Execute a control action on an entity and verify state change."""
+        import asyncio
+
         try:
             # Call the action
             if action == "on":
@@ -266,10 +268,21 @@ User Question: {user_message}"""
             else:
                 return {"success": False, "error": f"Unknown action: {action}"}
 
-            # Verify the state changed
+            # Wait briefly for HA to update state (avoids race condition)
+            await asyncio.sleep(0.5)
+
+            # Verify the state changed (retry once if it fails)
             state_result = await self.ha_client.get_entity_state(entity_id)
+
             if state_result.get("success"):
                 actual_state = state_result.get("data", {}).get("state", "unknown")
+
+                # If verification failed and we expected success, retry once
+                if expected_state and actual_state != expected_state:
+                    await asyncio.sleep(0.5)
+                    state_result = await self.ha_client.get_entity_state(entity_id)
+                    if state_result.get("success"):
+                        actual_state = state_result.get("data", {}).get("state", "unknown")
 
                 if expected_state:
                     # For on/off, check if state matches
