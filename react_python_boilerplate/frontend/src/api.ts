@@ -14,20 +14,18 @@ import {
 
 // Detect Home Assistant ingress proxy context
 // In HA ingress, window.location.pathname is something like: /api/addons/abc123/proxy/
-// We need to use that as the base for API calls
+// API calls should use relative paths that the proxy will route to the backend
 const getAPIBase = (): string => {
-  // Check if we're in a Home Assistant context by looking for the proxy path pattern
   const path = window.location.pathname
 
-  // Home Assistant ingress proxy pattern: /api/addons/{addon_id}/proxy/
-  const proxyMatch = path.match(/^(.*\/proxy)\/$/)
-
-  if (proxyMatch) {
-    // We're in Home Assistant ingress, use the proxy path
-    return `${proxyMatch[1]}/api`
+  // Home Assistant ingress proxy pattern: /api/addons/{addon_id}/proxy
+  // In this context, relative paths go directly to the backend (no /api prefix needed)
+  if (path.includes("/api/addons/") && path.includes("/proxy")) {
+    // Running in Home Assistant ingress - use relative path without /api prefix
+    return ""
   }
 
-  // Otherwise, use relative path (local development)
+  // Local development - use ./api prefix
   return "./api"
 }
 
@@ -40,7 +38,15 @@ async function apiCall<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const url = `${API_BASE}${endpoint}`
+  // Construct URL - handle both with and without API_BASE prefix
+  let url: string
+  if (API_BASE === "") {
+    // Home Assistant ingress context - endpoint is relative path from /api/addons/{id}/proxy/
+    url = `/api${endpoint}`
+  } else {
+    // Local development or absolute path
+    url = `${API_BASE}${endpoint}`
+  }
 
   try {
     const response = await fetch(url, {
