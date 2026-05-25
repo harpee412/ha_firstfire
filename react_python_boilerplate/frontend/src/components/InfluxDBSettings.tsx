@@ -34,11 +34,14 @@ export default function InfluxDBSettings() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
+  const [isV1, setIsV1] = useState(false)
   const [formData, setFormData] = useState({
     url: "",
     token: "",
+    username: "",
     org: "home-assistant",
     bucket: "home_assistant",
+    use_v1: false,
   })
 
   // Fetch InfluxDB status on mount
