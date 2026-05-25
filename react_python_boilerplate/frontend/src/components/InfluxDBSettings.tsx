@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from "react"
-import { sendChat } from "../api"
+import { getInfluxDBStatus, configureInfluxDB, testInfluxDBConnection } from "../api"
 
 const CSS_VARS = {
   bg: "#0a0c10",
@@ -52,16 +52,17 @@ export default function InfluxDBSettings() {
   const fetchStatus = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch("/api/influxdb/status")
-      const data = await response.json()
+      const response = await getInfluxDBStatus()
 
-      if (data.success && data.data) {
-        setStatus(data.data)
+      if (response.success && response.data) {
+        setStatus(response.data)
         setFormData({
-          url: data.data.url || "",
+          url: response.data.url || "",
           token: "",
-          org: data.data.org || "home-assistant",
-          bucket: data.data.bucket || "home_assistant",
+          username: "",
+          org: response.data.org || "home-assistant",
+          bucket: response.data.bucket || "home_assistant",
+          use_v1: false,
         })
       }
     } catch (err) {
@@ -82,26 +83,32 @@ export default function InfluxDBSettings() {
     setSuccess(null)
 
     if (!formData.url || !formData.token) {
-      setError("URL and token are required")
+      setError("URL and token/password are required")
+      return
+    }
+
+    if (isV1 && !formData.username) {
+      setError("Username is required for InfluxDB 1.x")
       return
     }
 
     try {
       setIsSaving(true)
-      const response = await fetch("/api/influxdb/config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      const response = await configureInfluxDB({
+        url: formData.url,
+        token: formData.token,
+        org: formData.org,
+        bucket: formData.bucket,
+        username: formData.username || undefined,
+        use_v1: isV1,
       })
 
-      const data = await response.json()
-
-      if (data.success) {
+      if (response.success) {
         setSuccess("InfluxDB connected successfully!")
         setShowForm(false)
         fetchStatus()
       } else {
-        setError(data.error?.message || "Failed to configure InfluxDB")
+        setError(response.error?.message || "Failed to configure InfluxDB")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Configuration failed")
@@ -112,17 +119,25 @@ export default function InfluxDBSettings() {
 
   const handleTestConnection = async () => {
     try {
-      const response = await fetch("/api/influxdb/test")
-      const data = await response.json()
+      const response = await testInfluxDBConnection()
 
-      if (data.success) {
+      if (response.success) {
         setSuccess("InfluxDB connection successful!")
       } else {
-        setError(data.error?.message || "Connection test failed")
+        setError(response.error?.message || "Connection test failed")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Test failed")
     }
+  }
+
+  const handleV1Toggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked
+    setIsV1(checked)
+    setFormData((prev) => ({
+      ...prev,
+      use_v1: checked,
+    }))
   }
 
   return (

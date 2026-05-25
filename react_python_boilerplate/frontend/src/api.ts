@@ -220,6 +220,39 @@ export async function sendChat(
 }
 
 /**
+ * Get InfluxDB status
+ */
+export async function getInfluxDBStatus(): Promise<ApiResponse<any>> {
+  return apiCall("/influxdb/status")
+}
+
+/**
+ * Configure InfluxDB connection
+ */
+export async function configureInfluxDB(config: {
+  url: string
+  token: string
+  org?: string
+  bucket?: string
+  username?: string
+  use_v1?: boolean
+}): Promise<ApiResponse<any>> {
+  return apiCall("/influxdb/config", {
+    method: "POST",
+    body: JSON.stringify(config),
+  })
+}
+
+/**
+ * Test InfluxDB connection
+ */
+export async function testInfluxDBConnection(): Promise<ApiResponse<any>> {
+  return apiCall("/influxdb/test", {
+    method: "POST",
+  })
+}
+
+/**
  * Storage utilities for localStorage management
  */
 export const Storage = {
