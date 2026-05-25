@@ -10,6 +10,7 @@ from typing import Optional, List
 from ..config import get_config_manager, get_config, FirstFireConfig
 from ..agents.agent_router import AgentRouter
 from ..conversation import get_conversation_manager
+from ..influxdb_client import init_influxdb, get_influxdb_client
 import openai
 
 router = APIRouter()
@@ -58,6 +59,23 @@ class ModelInfo(BaseModel):
     """Available OpenAI model information"""
     id: str
     name: str
+
+
+class InfluxDBConfigRequest(BaseModel):
+    """InfluxDB configuration request"""
+    url: str = Field(..., min_length=1)
+    token: str = Field(..., min_length=1)
+    org: Optional[str] = "home-assistant"
+    bucket: Optional[str] = "home_assistant"
+
+
+class InfluxDBStatus(BaseModel):
+    """InfluxDB status response"""
+    configured: bool
+    url: Optional[str] = None
+    org: Optional[str] = None
+    bucket: Optional[str] = None
+    connected: bool = False
 
 
 # ============================================================================
@@ -288,5 +306,137 @@ async def chat(request: ChatRequest) -> ChatResponse:
             error={
                 "code": "ERROR",
                 "message": f"Chat error: {str(e)}"
+            }
+        )
+
+
+# ============================================================================
+# InfluxDB Analytics Routes
+# ============================================================================
+
+@router.post("/influxdb/config", response_model=ChatResponse)
+async def configure_influxdb(request: InfluxDBConfigRequest) -> ChatResponse:
+    """Configure InfluxDB connection for analytics"""
+    try:
+        config_manager = get_config_manager()
+        success, error = config_manager.update_influxdb(
+            url=request.url,
+            token=request.token,
+            org=request.org,
+            bucket=request.bucket,
+        )
+
+        if not success:
+            return ChatResponse(
+                success=False,
+                error={"code": "CONFIG_ERROR", "message": error}
+            )
+
+        # Try to initialize connection
+        try:
+            client = init_influxdb(
+                url=request.url,
+                token=request.token,
+                org=request.org or "home-assistant",
+                bucket=request.bucket or "home_assistant",
+            )
+
+            if client.is_connected():
+                return ChatResponse(
+                    success=True,
+                    data={
+                        "message": "InfluxDB configured and connected successfully",
+                        "status": config_manager.get_status()
+                    }
+                )
+            else:
+                return ChatResponse(
+                    success=False,
+                    error={
+                        "code": "CONNECTION_FAILED",
+                        "message": "InfluxDB configuration saved but connection test failed"
+                    }
+                )
+        except Exception as e:
+            return ChatResponse(
+                success=False,
+                error={
+                    "code": "CONNECTION_ERROR",
+                    "message": f"Failed to connect to InfluxDB: {str(e)}"
+                }
+            )
+
+    except Exception as e:
+        return ChatResponse(
+            success=False,
+            error={
+                "code": "CONFIG_ERROR",
+                "message": f"Configuration error: {str(e)}"
+            }
+        )
+
+
+@router.get("/influxdb/status", response_model=ChatResponse)
+async def get_influxdb_status() -> ChatResponse:
+    """Get InfluxDB configuration and connection status"""
+    try:
+        config = get_config()
+        influxdb = get_influxdb_client()
+
+        return ChatResponse(
+            success=True,
+            data={
+                "configured": config.is_influxdb_configured(),
+                "url": config.influxdb_url,
+                "org": config.influxdb_org,
+                "bucket": config.influxdb_bucket,
+                "connected": influxdb.is_connected() if influxdb else False,
+            }
+        )
+    except Exception as e:
+        return ChatResponse(
+            success=False,
+            error={
+                "code": "ERROR",
+                "message": str(e)
+            }
+        )
+
+
+@router.post("/influxdb/test", response_model=ChatResponse)
+async def test_influxdb_connection() -> ChatResponse:
+    """Test InfluxDB connection"""
+    try:
+        influxdb = get_influxdb_client()
+
+        if not influxdb:
+            return ChatResponse(
+                success=False,
+                error={
+                    "code": "NOT_CONFIGURED",
+                    "message": "InfluxDB is not configured"
+                }
+            )
+
+        if influxdb.is_connected():
+            return ChatResponse(
+                success=True,
+                data={"message": "InfluxDB connection successful"}
+            )
+        else:
+            return ChatResponse(
+                success=False,
+                error={
+                    "code": "CONNECTION_FAILED",
+                    "message": "InfluxDB connection test failed"
+                }
+            )
+
+    except Exception as e:
+        return ChatResponse(
+            success=False,
+            error={
+                "code": "ERROR",
+                "message": f"Test error: {str(e)}"
             }
         )

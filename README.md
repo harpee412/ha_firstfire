@@ -1,17 +1,19 @@
 # FirstFire 🔥
 
-**AI-Powered Home Assistant Onboarding & Setup Guide**
+**AI-Powered Home Assistant Control & Analytics**
 
-FirstFire is a friendly, intelligent chatbot that helps new Home Assistant users get started quickly. It's powered by OpenAI and built on a production-ready React + FastAPI template.
+FirstFire transforms Home Assistant setup with an intelligent multi-agent system, beautiful dashboard, and time-series analytics. Control your lights, switches, and automations through natural language, with full conversation context and historical insights powered by InfluxDB.
 
 ## Features
 
-🤖 **AI-Powered Help** - Ask questions, get real-time answers about Home Assistant  
-🔐 **Secure Token Input** - Easy setup with your own OpenAI API key  
-🎨 **Beautiful UI** - Dark theme with a clean, modern design  
-⚡ **Fast & Responsive** - Built with React, TypeScript, and FastAPI  
+🤖 **Multi-Agent System** - Specialized agents for lights, switches, automations, and analytics  
+💬 **Natural Language Control** - "Turn off basement desk lights" → Executes immediately  
+📊 **Dashboard Interface** - System status cards and quick action buttons  
+📈 **Analytics** - Historical trends and patterns with InfluxDB integration  
+🔐 **Secure Configuration** - OpenAI token via Home Assistant options  
+🎨 **Cyberpunk Aesthetic** - Dark theme with cyan/magenta accents and scanlines  
+⚡ **State Verification** - Confirms actions actually worked  
 🐳 **Docker Ready** - Runs as a Home Assistant add-on  
-🔥 **Caveman Simple** - 4-step setup, no complexity  
 
 ## Quick Start
 
@@ -45,25 +47,27 @@ Then add FirstFire to your Home Assistant add-ons via the directory.
 ## Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│       FirstFire Web Interface            │
-│   (React + TypeScript + Vite)            │
-│                                         │
-│  ▸ Welcome → Setup → Confirm → Chat     │
-└────────────────┬────────────────────────┘
-                 │ HTTP/JSON
-                 ▼
-┌─────────────────────────────────────────┐
-│      FastAPI Backend (Python)            │
-│                                         │
-│  ▸ /api/chat                            │
-│  ▸ /api/config/*                        │
-│  ▸ /api/validate-token                  │
-└────────────────┬────────────────────────┘
-                 │
-                 ▼
-            OpenAI API
-         (GPT-4 Turbo, etc)
+Frontend (React)
+├── Sidebar (sticky navigation)
+├── Dashboard (home page)
+│   ├── Status cards (lights, switches, automations, analytics)
+│   └── Quick actions
+├── Chat (conversation with context)
+└── Settings (InfluxDB configuration)
+    │
+    ├→ AgentRouter
+    │  ├→ LightAgent → Home Assistant API
+    │  ├→ SwitchAgent → Home Assistant API
+    │  ├→ AutomationAgent → Home Assistant API
+    │  ├→ SystemAgent → Home Assistant API
+    │  ├→ AnalyticsAgent → InfluxDB
+    │  └→ OpenAI API (for reasoning)
+    │
+    └→ Backend (FastAPI)
+       ├─ Chat endpoints with multi-turn context
+       ├─ Configuration management (options.json, env vars)
+       ├─ InfluxDB auto-detection & configuration
+       └─ Home Assistant supervisor integration
 ```
 
 ## Project Structure
@@ -179,24 +183,33 @@ See `VERSIONING.md` for detailed guide.
 ## Roadmap
 
 ### ✅ v0.1.0 (Current)
-- OpenAI integration
-- Token configuration
-- Basic chat
-- 4-step onboarding
+- Multi-agent system (Light, Switch, Automation, Analytics, System)
+- Dashboard-first UI with status cards
+- Natural language control with state verification
+- Multi-turn conversation context preservation
+- InfluxDB integration with auto-detection
+- OpenAI token configuration
+- Cyberpunk aesthetic (Noto Sans, dark theme, scanlines)
+- Markdown response formatting
 
 ### 📋 v0.2.0 (Planned)
-- Streaming responses
-- Conversation history
-- Better error messages
+- Energy consumption analytics with InfluxDB
+- Anomaly detection in historical data
+- Automation recommendations based on patterns
+- Custom quick actions per home/user
+- Streaming responses for faster feedback
 
 ### 📋 v0.3.0 (Planned)
-- Backend sessions (security)
-- Rate limiting
-- Usage stats
+- Multi-user support with permissions
+- Conversation history in InfluxDB
+- Voice control integration
+- Rate limiting & usage stats
 
 ### 📋 v1.0.0 (Planned)
 - Production hardening
-- Full documentation
+- Mobile app version
+- AI-powered home setup wizard
+- Community shared automations
 
 ## Security
 
@@ -226,11 +239,50 @@ See `VERSIONING.md` for detailed guide.
 - Check OpenAI quota/billing
 - Verify max_tokens setting
 
+## New in v0.1.0
+
+### Dashboard
+Configured instances now land on a beautiful dashboard showing:
+- **Lights Card**: Count of on/off lights
+- **Switches Card**: Count of on/off switches  
+- **Automations Card**: Total number of automations
+- **Analytics Card**: InfluxDB connection status
+- **Quick Actions**: Configurable button commands
+
+### Multi-Agent System
+Messages are intelligently routed to specialized agents:
+- **Light/Switch Control**: Direct API calls with state verification
+- **Automation Queries**: Information about existing automations
+- **System Status**: Overview of entities, integrations, and metrics
+- **Analytics**: Historical trends and patterns from InfluxDB
+
+### InfluxDB Integration
+Optional time-series database integration:
+- Auto-detection on startup
+- Manual configuration via Settings UI
+- Historical trend queries
+- Usage pattern analysis
+- Energy consumption tracking (coming soon)
+
+### Conversation Context
+Multi-turn conversations that remember state:
+```
+User: "How many lights are on?"
+Bot: "You have 12 lights on"
+
+User: "Turn off the kitchen lights"
+Bot: "Kitchen lights are now off"
+
+User: "How many now?"
+Bot: "You have 11 lights on now" ← Remembers previous context
+```
+
 ## Documentation
 
-- **Quick Start**: See `QUICKSTART.md`
-- **Technical Details**: See `IMPLEMENTATION_SUMMARY.md`
-- **Versioning**: See `VERSIONING.md`
+- **Quick Reference**: See `QUICK_REFERENCE.md` - API endpoints and commands
+- **Testing Guide**: See `TESTING_GUIDE.md` - Complete test scenarios
+- **Implementation**: See `IMPLEMENTATION_SUMMARY.md` - Technical architecture
+- **Complete Status**: See `COMPLETE_STATUS.md` - What's implemented
 
 ## License
 

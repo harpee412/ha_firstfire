@@ -34,6 +34,24 @@ class FirstFireConfig(BaseModel):
         description="System prompt for the AI assistant"
     )
 
+    # InfluxDB configuration (optional)
+    influxdb_url: Optional[str] = Field(
+        default=None,
+        description="InfluxDB URL (e.g., http://influxdb:8086)"
+    )
+    influxdb_token: Optional[str] = Field(
+        default=None,
+        description="InfluxDB API token for authentication"
+    )
+    influxdb_org: Optional[str] = Field(
+        default="home-assistant",
+        description="InfluxDB organization name"
+    )
+    influxdb_bucket: Optional[str] = Field(
+        default="home_assistant",
+        description="InfluxDB bucket name"
+    )
+
     @field_validator("model")
     @classmethod
     def validate_model(cls, v: str) -> str:
@@ -70,6 +88,10 @@ class FirstFireConfig(BaseModel):
         """Check if OpenAI token is configured"""
         return bool(self.openai_token)
 
+    def is_influxdb_configured(self) -> bool:
+        """Check if InfluxDB is configured"""
+        return bool(self.influxdb_url and self.influxdb_token)
+
     def to_dict(self) -> dict:
         """Convert config to dictionary, hiding sensitive data"""
         return {
@@ -77,6 +99,10 @@ class FirstFireConfig(BaseModel):
             "model": self.model,
             "max_tokens": self.max_tokens,
             "openai_token_masked": self._mask_token() if self.openai_token else None,
+            "influxdb_configured": self.is_influxdb_configured(),
+            "influxdb_url": self.influxdb_url,
+            "influxdb_org": self.influxdb_org,
+            "influxdb_bucket": self.influxdb_bucket,
         }
 
     def _mask_token(self) -> str:
@@ -136,6 +162,15 @@ class ConfigManager:
                         config_data["max_tokens"] = ha_options["max_tokens"]
                     if "system_prompt" in ha_options and ha_options["system_prompt"]:
                         config_data["system_prompt"] = ha_options["system_prompt"]
+                    # InfluxDB config
+                    if "influxdb_url" in ha_options and ha_options["influxdb_url"]:
+                        config_data["influxdb_url"] = ha_options["influxdb_url"]
+                    if "influxdb_token" in ha_options and ha_options["influxdb_token"]:
+                        config_data["influxdb_token"] = ha_options["influxdb_token"]
+                    if "influxdb_org" in ha_options and ha_options["influxdb_org"]:
+                        config_data["influxdb_org"] = ha_options["influxdb_org"]
+                    if "influxdb_bucket" in ha_options and ha_options["influxdb_bucket"]:
+                        config_data["influxdb_bucket"] = ha_options["influxdb_bucket"]
         except Exception as e:
             print(f"Note: Could not load Home Assistant options.json: {e}")
 
@@ -158,6 +193,23 @@ class ConfigManager:
         env_system_prompt = os.getenv("FIRSTFIRE_SYSTEM_PROMPT")
         if env_system_prompt:
             config_data["system_prompt"] = env_system_prompt
+
+        # InfluxDB environment variables
+        env_influxdb_url = os.getenv("INFLUXDB_URL")
+        if env_influxdb_url:
+            config_data["influxdb_url"] = env_influxdb_url
+
+        env_influxdb_token = os.getenv("INFLUXDB_TOKEN")
+        if env_influxdb_token:
+            config_data["influxdb_token"] = env_influxdb_token
+
+        env_influxdb_org = os.getenv("INFLUXDB_ORG")
+        if env_influxdb_org:
+            config_data["influxdb_org"] = env_influxdb_org
+
+        env_influxdb_bucket = os.getenv("INFLUXDB_BUCKET")
+        if env_influxdb_bucket:
+            config_data["influxdb_bucket"] = env_influxdb_bucket
 
         # Load from config.yaml (would be set by Home Assistant)
         if self.config_file and self.config_file.exists():
@@ -197,6 +249,40 @@ class ConfigManager:
             self.config.openai_token = token
             return True, None
         except ValueError as e:
+            return False, str(e)
+
+    def update_influxdb(
+        self,
+        url: str,
+        token: str,
+        org: Optional[str] = None,
+        bucket: Optional[str] = None,
+    ) -> tuple[bool, Optional[str]]:
+        """
+        Update InfluxDB configuration
+
+        Args:
+            url: InfluxDB URL
+            token: InfluxDB API token
+            org: Organization name (optional, uses default if not provided)
+            bucket: Bucket name (optional, uses default if not provided)
+
+        Returns:
+            Tuple of (success: bool, error_message: Optional[str])
+        """
+        try:
+            if not url or not token:
+                return False, "URL and token are required"
+
+            self.config.influxdb_url = url
+            self.config.influxdb_token = token
+            if org:
+                self.config.influxdb_org = org
+            if bucket:
+                self.config.influxdb_bucket = bucket
+
+            return True, None
+        except Exception as e:
             return False, str(e)
 
     def get_config(self) -> FirstFireConfig:

@@ -7,6 +7,7 @@ from .system_agent import SystemAgent
 from .light_agent import LightAgent
 from .switch_agent import SwitchAgent
 from .automation_agent import AutomationAgent
+from .analytics_agent import AnalyticsAgent
 from .base import BaseAgent
 
 
@@ -27,6 +28,7 @@ class AgentRouter:
         self.light_agent = LightAgent()
         self.switch_agent = SwitchAgent()
         self.automation_agent = AutomationAgent()
+        self.analytics_agent = AnalyticsAgent()
 
         # Map keywords to agents
         self.agent_keywords = {
@@ -44,6 +46,14 @@ class AgentRouter:
             "automate": self.automation_agent,
             "schedule": self.automation_agent,
             "trigger": self.automation_agent,
+            "history": self.analytics_agent,
+            "trend": self.analytics_agent,
+            "pattern": self.analytics_agent,
+            "analytics": self.analytics_agent,
+            "energy": self.analytics_agent,
+            "consumption": self.analytics_agent,
+            "stats": self.analytics_agent,
+            "statistic": self.analytics_agent,
         }
 
     async def route(self, user_message: str, history: list = None) -> Dict[str, Any]:
@@ -74,7 +84,7 @@ class AgentRouter:
         Select agent based on message content
 
         Priority:
-        1. Direct keyword match (lights/switches/automations)
+        1. Direct keyword match (lights/switches/automations/analytics)
         2. Entity type detection (light entities vs switch entities)
         3. Action-based intent
         4. Default to SystemAgent
@@ -85,6 +95,10 @@ class AgentRouter:
         for keyword, agent in self.agent_keywords.items():
             if keyword in message_lower:
                 return agent
+
+        # Check for analytics intent (history, trends, patterns)
+        if self._is_analytics_intent(message_lower):
+            return self.analytics_agent
 
         # Check for action-based intent (specific control operations)
         if self._is_automation_intent(message_lower):
@@ -136,3 +150,13 @@ class AgentRouter:
         """Check if message is about switches specifically"""
         switch_words = ["turn on", "turn off", "power", "device"]
         return any(word in message for word in switch_words)
+
+    @staticmethod
+    def _is_analytics_intent(message: str) -> bool:
+        """Check if message is requesting historical analysis or trends"""
+        analytics_words = [
+            "history", "historical", "trend", "pattern", "analytics",
+            "energy", "consumption", "usage", "stats", "statistics",
+            "over time", "how often", "when do", "average", "peak"
+        ]
+        return any(word in message for word in analytics_words)
