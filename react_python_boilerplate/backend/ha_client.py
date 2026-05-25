@@ -116,3 +116,64 @@ class HomeAssistantClient:
                 return {"success": False, "error": f"Status {response.status_code}: {response.text}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    # =========================================================================
+    # Light Control Methods
+    # =========================================================================
+
+    async def turn_on_light(self, entity_id: str, brightness: Optional[int] = None, **kwargs) -> Dict[str, Any]:
+        """Turn on a light with optional brightness (0-255)"""
+        service_data = {"entity_id": entity_id}
+        if brightness is not None:
+            service_data["brightness"] = max(0, min(255, brightness))
+        service_data.update(kwargs)
+        return await self.call_service("light", "turn_on", service_data)
+
+    async def turn_off_light(self, entity_id: str) -> Dict[str, Any]:
+        """Turn off a light"""
+        return await self.call_service("light", "turn_off", {"entity_id": entity_id})
+
+    async def toggle_light(self, entity_id: str) -> Dict[str, Any]:
+        """Toggle a light on/off"""
+        return await self.call_service("light", "toggle", {"entity_id": entity_id})
+
+    async def set_light_brightness(self, entity_id: str, brightness: int) -> Dict[str, Any]:
+        """Set light brightness (0-255)"""
+        return await self.turn_on_light(entity_id, brightness=brightness)
+
+    # =========================================================================
+    # Switch Control Methods
+    # =========================================================================
+
+    async def turn_on_switch(self, entity_id: str) -> Dict[str, Any]:
+        """Turn on a switch"""
+        return await self.call_service("switch", "turn_on", {"entity_id": entity_id})
+
+    async def turn_off_switch(self, entity_id: str) -> Dict[str, Any]:
+        """Turn off a switch"""
+        return await self.call_service("switch", "turn_off", {"entity_id": entity_id})
+
+    async def toggle_switch(self, entity_id: str) -> Dict[str, Any]:
+        """Toggle a switch"""
+        return await self.call_service("switch", "toggle", {"entity_id": entity_id})
+
+    # =========================================================================
+    # Generic Control Methods
+    # =========================================================================
+
+    async def turn_on_entity(self, entity_id: str, **kwargs) -> Dict[str, Any]:
+        """Generic turn on for any domain"""
+        domain = entity_id.split(".")[0]
+        service_data = {"entity_id": entity_id}
+        service_data.update(kwargs)
+        return await self.call_service(domain, "turn_on", service_data)
+
+    async def turn_off_entity(self, entity_id: str) -> Dict[str, Any]:
+        """Generic turn off for any domain"""
+        domain = entity_id.split(".")[0]
+        return await self.call_service(domain, "turn_off", {"entity_id": entity_id})
+
+    async def toggle_entity(self, entity_id: str) -> Dict[str, Any]:
+        """Generic toggle for any domain"""
+        domain = entity_id.split(".")[0]
+        return await self.call_service(domain, "toggle", {"entity_id": entity_id})

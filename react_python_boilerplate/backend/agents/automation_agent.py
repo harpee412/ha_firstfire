@@ -41,13 +41,20 @@ Your role is to:
 2. Identify gaps where automations could improve the user's home
 3. Suggest new automation patterns based on current setup
 4. Help users create and refine automations
-5. Optimize automation rules and conditions
-6. Troubleshoot automation issues
+5. Enable and disable automations as needed
+6. Optimize automation rules and conditions
+7. Troubleshoot automation issues
 
 You understand automation structure:
 - **Triggers:** What starts the automation (time, event, state change)
 - **Conditions:** When the trigger is allowed to execute (optional checks)
 - **Actions:** What happens when triggered (service calls, notifications, scenes)
+
+You can take action on automations:
+- "Disable the motion sensor automation" → Turn off the automation
+- "Enable my morning routine" → Turn on the automation
+- "Create a bedtime automation" → Guide user through creation
+- Always explain what you're doing before executing
 
 Always respond in Markdown format. When showing automations:
 - Use clear headers for trigger, condition, and action
@@ -241,3 +248,19 @@ User Question: {user_message}"""
         )
 
         return "\n".join(output)
+
+    # =========================================================================
+    # Automation Control Actions
+    # =========================================================================
+
+    async def enable_automation(self, entity_id: str) -> Dict[str, Any]:
+        """Enable an automation (turn it on)"""
+        return await self.ha_client.turn_on_entity(entity_id)
+
+    async def disable_automation(self, entity_id: str) -> Dict[str, Any]:
+        """Disable an automation (turn it off)"""
+        return await self.ha_client.turn_off_entity(entity_id)
+
+    async def toggle_automation(self, entity_id: str) -> Dict[str, Any]:
+        """Toggle an automation on/off"""
+        return await self.ha_client.toggle_entity(entity_id)
