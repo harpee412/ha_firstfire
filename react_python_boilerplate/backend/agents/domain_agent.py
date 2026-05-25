@@ -86,6 +86,9 @@ When showing state or configuration, use code blocks and lists for readability."
         """
         Process message with domain-specific context
 
+        For CONTROL intents: Directly execute actions and verify
+        For other intents: Use OpenAI for understanding and response
+
         Args:
             user_message: User's question about this domain
             history: Conversation history for context
@@ -99,27 +102,13 @@ When showing state or configuration, use code blocks and lists for readability."
             # Step 1: Parse intent (lightweight, no HA call yet)
             intent = self._parse_intent(user_message)
 
-            # Step 2: Fetch only data needed for this intent
-            domain_data = await self._fetch_domain_data(intent)
-
-            # Step 3: For control intents, try to find matching entities
-            entity_matches = ""
+            # Step 2: CONTROL INTENT - Execute actions directly
             if intent == "control":
-                entities_result = await self.ha_client.get_entities()
-                if entities_result.get("success"):
-                    all_entities = entities_result.get("data", [])
-                    domain_entities = [
-                        e for e in all_entities
-                        if e.get("entity_id", "").startswith(f"{self.domain}.")
-                    ]
-                    matches = self._find_matching_entities(user_message, domain_entities)
-                    if matches:
-                        entity_matches = "\n\nMatching entities found:\n"
-                        for entity in matches[:5]:  # Top 5 matches
-                            name = entity.get("attributes", {}).get("friendly_name", entity.get("entity_id"))
-                            entity_id = entity.get("entity_id")
-                            state = entity.get("state")
-                            entity_matches += f"- **{name}** (`{entity_id}`) - State: {state}\n"
+                return await self._handle_control_intent(user_message)
+
+            # Step 3: NON-CONTROL INTENT - Use OpenAI for response
+            # Fetch only data needed for this intent
+            domain_data = await self._fetch_domain_data(intent)
 
             # Step 4: Build messages with conversation history
             messages = [
@@ -135,7 +124,7 @@ When showing state or configuration, use code blocks and lists for readability."
 
             # Add current context and question
             user_context = f"""Current {self.domain_name} Status:
-{domain_data}{entity_matches}
+{domain_data}
 
 User Question: {user_message}"""
 
@@ -176,6 +165,102 @@ User Question: {user_message}"""
                 "error": f"{self.domain.title()}Agent error: {str(e)}",
                 "tokens_used": 0,
             }
+
+    async def _handle_control_intent(self, user_message: str) -> Dict[str, Any]:
+        """
+        Handle control intents by executing actions and verifying results
+
+        This directly executes the control action without going through OpenAI.
+        """
+        try:
+            # Find matching entities
+            entities_result = await self.ha_client.get_entities()
+            if not entities_result.get("success"):
+                return {
+                    "success": False,
+                    "error": "Could not fetch entities from Home Assistant",
+                    "tokens_used": 0,
+                }
+
+            all_entities = entities_result.get("data", [])
+            domain_entities = [
+                e for e in all_entities
+                if e.get("entity_id", "").startswith(f"{self.domain}.")
+            ]
+
+            # Find best matches
+            matches = self._find_matching_entities(user_message, domain_entities)
+            if not matches:
+                return {
+                    "success": True,
+                    "response": f"No {self.domain_name} found matching '{user_message}'",
+                    "tokens_used": 0,
+                    "metadata": {"agent": f"{self.domain_name.title()} Agent", "intent": "control"}
+                }
+
+            # Determine action from message
+            action = self._determine_control_action(user_message)
+
+            # Execute action on each matching entity
+            results = []
+            for entity in matches:
+                entity_id = entity.get("entity_id")
+                name = entity.get("attributes", {}).get("friendly_name", entity_id)
+
+                # Execute the action
+                action_result = await self._execute_control_action(action, entity_id)
+
+                # Build result message
+                if action_result.get("verification", {}).get("success"):
+                    results.append(f"✓ {action.title()} {name}")
+                else:
+                    results.append(f"✗ Failed to {action} {name} - still {action_result.get('verification', {}).get('actual_state', 'unchanged')}")
+
+            # Build response
+            response_text = f"**{action.title()} {self.domain_name}:**\n" + "\n".join(results)
+
+            return {
+                "success": True,
+                "response": response_text,
+                "tokens_used": 0,
+                "metadata": {
+                    "agent": f"{self.domain_name.title()} Agent",
+                    "intent": "control",
+                    "actions_executed": len(matches),
+                }
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Error executing control action: {str(e)}",
+                "tokens_used": 0,
+            }
+
+    def _determine_control_action(self, user_message: str) -> str:
+        """Determine the control action from user message"""
+        message_lower = user_message.lower()
+
+        if any(word in message_lower for word in ["turn on", "on", "enable", "set on"]):
+            return "on"
+        elif any(word in message_lower for word in ["turn off", "off", "disable", "set off"]):
+            return "off"
+        elif any(word in message_lower for word in ["toggle", "switch"]):
+            return "toggle"
+        else:
+            return "off"  # Default to off for ambiguous requests
+
+    async def _execute_control_action(self, action: str, entity_id: str) -> Dict[str, Any]:
+        """Execute a control action on an entity. Must be overridden by subclasses."""
+        # Default implementation - subclasses should override
+        if action == "on":
+            return await self.ha_client.turn_on_entity(entity_id)
+        elif action == "off":
+            return await self.ha_client.turn_off_entity(entity_id)
+        elif action == "toggle":
+            return await self.ha_client.toggle_entity(entity_id)
+        else:
+            return {"success": False, "error": f"Unknown action: {action}"}
 
     def _parse_intent(self, user_message: str) -> str:
         """
